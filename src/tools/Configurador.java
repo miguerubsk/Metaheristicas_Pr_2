@@ -18,7 +18,9 @@ public class Configurador {
 
     private ArrayList<String> Ficheros, tipoCruce;
     private ArrayList<Long> Semillas;
-    private Integer Evaluaciones, Poblacion;
+    private ArrayList<Integer> Elite;
+    private Integer Evaluaciones, TamPoblacion;
+    private float Prob_Cruce, Prob_Mutacion;
 
     public Configurador(String ruta) {
         Ficheros = new ArrayList<>();
@@ -46,7 +48,7 @@ public class Configurador {
                             Semillas.add(Long.parseLong(vS[i]));
                         }
                         break;
-                    case "Algoritmos":
+                    case "Cruce":
                         String[] vA = split[1].split(" ");
                         for (int i = 0; i < vA.length; i++) {
                             tipoCruce.add(vA[i]);
@@ -56,7 +58,7 @@ public class Configurador {
                         Evaluaciones = Integer.parseInt(split[1]);
                         break;
                     case "Poblacion":
-                        Poblacion = Integer.parseInt(split[1]);
+                        TamPoblacion = Integer.parseInt(split[1]);
                         break;
                 }
             }
@@ -82,8 +84,22 @@ public class Configurador {
         return Evaluaciones;
     }
 
-    public int getTenencia() {
-        return Poblacion;
+    public int getTamPoblacion() {
+        return TamPoblacion;
     }
+
+    public ArrayList<Integer> getElite() {
+        return Elite;
+    }
+
+    public float getProb_Cruce() {
+        return Prob_Cruce;
+    }
+
+    public float getProb_Mutacion() {
+        return Prob_Mutacion;
+    }
+    
+    
 
 }
