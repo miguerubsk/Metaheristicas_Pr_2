@@ -26,6 +26,7 @@ public class Configurador {
         Ficheros = new ArrayList<>();
         tipoCruce = new ArrayList<>();
         Semillas = new ArrayList<>();
+        Elite = new ArrayList<>();
 
         String linea;
         FileReader f = null;
@@ -54,11 +55,23 @@ public class Configurador {
                             tipoCruce.add(vA[i]);
                         }
                         break;
+                    case "Elite":
+                        String[] vE = split[1].split(" ");
+                        for (int i = 0; i < vE.length; i++) {
+                            Elite.add(Integer.parseInt(vE[i]));
+                        }
+                        break;
                     case "Evaluaciones":
                         Evaluaciones = Integer.parseInt(split[1]);
                         break;
                     case "Poblacion":
                         TamPoblacion = Integer.parseInt(split[1]);
+                        break;
+                    case "Prob_Cruce":
+                        Prob_Cruce = Float.parseFloat(split[1]);
+                        break;
+                    case "Prob_Mutacion":
+                        Prob_Mutacion = Float.parseFloat(split[1]);
                         break;
                 }
             }
@@ -99,7 +112,5 @@ public class Configurador {
     public float getProb_Mutacion() {
         return Prob_Mutacion;
     }
-    
-    
 
 }
