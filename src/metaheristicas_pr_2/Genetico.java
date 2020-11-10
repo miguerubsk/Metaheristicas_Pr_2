@@ -25,9 +25,6 @@ public class Genetico {
         
     }
     
-    
-    
-    
     /**
      * @brief Genera una solucion aleatoria
      * @param tamañoSolucion tamaño de la solucion
@@ -55,8 +52,8 @@ public class Genetico {
         intercambia(p, n, v);
     }
     
-    private void cruceDosPuntos(Vector<Integer> a, Vector<Integer> b){
-        Vector<Integer> r1,r2;
+    private void cruce2P(Vector<Integer> a, Vector<Integer> b){
+        Vector<Integer> r1 = new Vector<>(),r2 = new Vector<>();
         int tam = a.size();
         int p1, p2, aux;
         p1 = aleatorio.nextInt(tam);
@@ -71,6 +68,24 @@ public class Genetico {
             p1=p2;
             p2=aux;
         }
+        
+        for (int i = 0; i < p1; i++){
+            r1.add(b.get(i));
+            r2.add(a.get(i));
+        }
+        for (int i = p1; i < p2; i++){
+            r1.add(a.get(i));
+            r2.add(b.get(i));
+        }
+        for (int i = p2; i < a.size(); i++){
+            r1.add(b.get(i));
+            r2.add(a.get(i));
+        }
+        
+        a.clear();
+        b.clear();
+        a=r1;
+        b=r2;
         
     }
     
