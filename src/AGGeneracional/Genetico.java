@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package AGeneracional;
+package AGGeneracional;
 
 import java.util.Random;
 import java.util.Vector;
@@ -43,10 +43,10 @@ public class Genetico {
     }
     
     /**
-     * 
-     * @param v
-     * @param p
-     * @param n 
+     * @brief Funcion que muta un gen de un cromosoma
+     * @param v Cromosoma que se quiere mutar
+     * @param p posicion del gen que se quiere mutar
+     * @param n rango de valores de la mutacion
      */
     private void Mutacion(Vector<Integer> v, int p, int n){
         
@@ -55,7 +55,7 @@ public class Genetico {
             x = aleatorio.nextInt(n);
         }while(v.contains(x));
         
-        intercambia(p, n, v);
+        intercambia(p, x, v);
     }
     
     void reparar2Puntos(Vector<Integer> a, int Dist[][], int n){
