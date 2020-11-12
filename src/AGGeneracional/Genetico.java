@@ -26,23 +26,6 @@ public class Genetico {
     }
     
     /**
-     * @brief Genera una solucion aleatoria
-     * @param tamañoSolucion tamaño de la solucion
-     * @param tamañoMatriz tamaño de la matriz
-     */
-    private void generarSolucionAleatoria(int tamañoSolucion, int tamañoMatriz, Vector<Integer> solucion) {
-        Integer generados = 0;
-
-        while (generados < tamañoSolucion) {
-            Integer elemento = aleatorio.nextInt(tamañoMatriz);
-            if (!solucion.contains(elemento)) {
-                solucion.add(elemento);
-                generados++;
-            }
-        }
-    }
-    
-    /**
      * @brief Funcion que muta un gen de un cromosoma
      * @param v Cromosoma que se quiere mutar
      * @param p posicion del gen que se quiere mutar
