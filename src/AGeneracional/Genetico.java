@@ -42,6 +42,12 @@ public class Genetico {
         }
     }
     
+    /**
+     * 
+     * @param v
+     * @param p
+     * @param n 
+     */
     private void Mutacion(Vector<Integer> v, int p, int n){
         
         int x = 0;
@@ -52,6 +58,30 @@ public class Genetico {
         intercambia(p, n, v);
     }
     
+    void reparar2Puntos(Vector<Integer> a, int Dist[][], int n){
+        Vector<Integer> r = new Vector<Integer>();
+        
+        int m = a.size();
+        for (int i = 0; i < m; i++) {
+            boolean enc=false;
+            for (int j = 0; j < r.size(); j++) {
+                if(a.get(i) == r.get(j)){
+                    enc = true;
+                    break;
+                }
+                
+            }
+            if(!enc)
+                r.add(a.get(i));
+        }
+    }
+    
+    /**
+     * @brief Cruza dos cromosomas usando el cruce en 2 puntos
+     * @param a Primer cromosoma a cruzar
+     * @param b Segundo cromosoma a cruzar
+     * 
+     */
     private void cruce2P(Vector<Integer> a, Vector<Integer> b){
         Vector<Integer> r1 = new Vector<>(),r2 = new Vector<>();
         int tam = a.size();
