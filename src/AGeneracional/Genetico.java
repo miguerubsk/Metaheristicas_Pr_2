@@ -74,6 +74,57 @@ public class Genetico {
             if(!enc)
                 r.add(a.get(i));
         }
+        int x = a.size() - r.size();
+        for (int i = 0; i < x; i++) {
+            int ele = MasAporta(Dist, a, n);
+        }
+    }
+    
+    private void repararMPX(Vector<Integer> a, double dist[][], int m){
+        Vector<Integer> r;
+        int dif = a.size()-m;
+        for (int i = 0; i < dif; i++) {
+            int p = menorAporte(a.size(), dist, a);
+            
+        }
+    }
+    
+    /**
+     * @brief Funcion que obtiene la posicion de menor aporte de la solucion
+     * @param m tamaño de la solucion
+     * @param dist matriz de distancias
+     * @param vector una solucion
+     * @return posicion de menor aporte
+     */
+    private Integer menorAporte(int m, double[][] dist, Vector<Integer> vector) {
+        double peso = 0.0;
+        Integer posMenor = 0;
+        double menor = 999999999;
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < m; j++) {
+                if (vector.get(i) != vector.get(j)) {
+                    peso += dist[vector.get(i)][vector.get(j)];
+                }
+            }
+
+            if (peso < menor) {
+                menor = peso;
+                posMenor = i;
+            }
+            peso = 0.0;
+        }
+
+        return posMenor;
+    }
+    
+    private int MasAporta(int dist[][], Vector<Integer> a, int n){
+        double mayorDist = 0.0;
+        double d = 0.0;
+        int punto = 0;
+        for (long i = 0; i < n; i++) {
+            //TODO        
+        }
+        return punto;
     }
     
     /**
