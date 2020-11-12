@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package metaheristicas_pr_2;
+package AGeneracional;
 
 import java.util.Random;
 import java.util.Vector;
@@ -89,6 +89,13 @@ public class Genetico {
         
     }
     
+    /**
+     * @brief función que devuelve un hijo al cruzar dos cromosomas usando MPX
+     * @param a primer cromosoma a cruzar
+     * @param b segundo cromosoma a cruzar
+     * @param por probabilidad de que se realize el cruce
+     * @return un cromosoma resultado de cruzar dos cromosomas
+     */
     private Vector<Integer> obtenerHijoMPX(Vector<Integer> a, Vector<Integer> b, int por){
         int p;
         Vector<Integer> aa = a, bb = b, r = new Vector<>();
@@ -110,7 +117,13 @@ public class Genetico {
         return r;
     }
     
-    private void cruceMPX(){
+    /**
+     * @brief funcion que cruza dos cromosomas usando MPX
+     * @param a primer cromosoma a cruzar
+     * @param b segundo cromosoma a cruzar
+     * @param por probabilidad de que se realize el cruce
+     */
+    private void cruceMPX(Vector<Integer> a, Vector<Integer> b, int por){
         
     }
     
