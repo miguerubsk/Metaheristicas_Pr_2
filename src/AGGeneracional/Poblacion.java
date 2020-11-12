@@ -5,6 +5,7 @@
  */
 package AGGeneracional;
 
+import java.util.Random;
 import java.util.Vector;
 
 /**
@@ -15,9 +16,9 @@ public class Poblacion {
     private Vector<Individuo> poblacion;
     private int tamPoblacion;
     
-    public Poblacion(){
+    public Poblacion(int tam, long semilla){
         poblacion = new Vector<Individuo>();
-        tamPoblacion = 0;
+        tamPoblacion = tam;
     }
     
     
