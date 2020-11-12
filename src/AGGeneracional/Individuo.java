@@ -7,6 +7,7 @@ package AGGeneracional;
 
 import java.util.Random;
 import java.util.Vector;
+import tools.CargaDatos;
 
 /**
  *
@@ -17,11 +18,16 @@ public class Individuo {
     private int tamCromosoma;
     private double coste;
     private Random aleatorio;
+    private boolean calculado;
+    private CargaDatos datos;
     
-    public Individuo(long semilla, int tamMatriz){
-        cromosoma = generarCromosomaAleatorio(tamMatriz);
-        coste = 0.0;
-        aleatorio = new Random(semilla);
+    public Individuo(long semilla, CargaDatos datos){
+        this.datos = datos;
+        this.aleatorio = new Random(semilla);
+        this.tamCromosoma = this.datos.getTamSolucion();
+        this.cromosoma = generarCromosomaAleatorio(this.datos.getTamMatriz());
+        this.coste = coste(this.datos);
+        this.calculado = true;
     }
 
     public Vector<Integer> getCromosoma() {
@@ -34,6 +40,16 @@ public class Individuo {
 
     public double getCoste() {
         return coste;
+    }
+
+    public boolean isCalculado() {
+        return calculado;
+    }
+    
+    public void actualizarCoste(){
+        if(!calculado){
+            coste = coste(datos);
+        }
     }
     
     /**
@@ -53,5 +69,23 @@ public class Individuo {
             }
         }
         return crom;
+    }
+    
+    /**
+     * @brief Función que calcula el coste de la solucion
+     * @param matriz matriz de distancias
+     * @param tamañoSolucion tamaño de la solucion
+     * @return Coste de la solucion
+     */
+    private double coste(CargaDatos datos) {
+        double coste = 0.0;
+
+        for (int i = 0; i < tamCromosoma; i++) {
+            for (int j = i + 1; j < tamCromosoma; j++) {
+                coste += datos.getMatriz()[cromosoma.get(j)][cromosoma.get(i)];
+            }
+        }
+
+        return coste;
     }
 }
