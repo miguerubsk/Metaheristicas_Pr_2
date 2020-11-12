@@ -5,29 +5,43 @@
  */
 package AGGeneracional;
 
-import java.util.Random;
 import java.util.Vector;
+import tools.CargaDatos;
 
 /**
  *
  * @author miguerubsk
  */
 public class Poblacion {
+
     private Vector<Individuo> poblacion;
     private int tamPoblacion;
-    
-    public Poblacion(int tam, long semilla){
-        poblacion = new Vector<Individuo>();
-        tamPoblacion = tam;
-    }
-    
-    
+    private long semilla;
+    private CargaDatos datos;
 
-    public Vector<Individuo> getPoblacion() {
-        return poblacion;
+    public Poblacion(int tam, long semilla, CargaDatos datos) {
+        this.poblacion = new Vector<Individuo>();
+        this.tamPoblacion = tam;
+        this.semilla = semilla;
+        this.datos = datos;
+        generarPoblacion();
+    }
+
+//    public Vector<Individuo> getPoblacion() {
+//        return poblacion;
+//    }
+    
+    public Individuo getIndividuo(int i){
+        return poblacion.get(i);
     }
 
     public int getTamPoblacion() {
         return tamPoblacion;
+    }
+
+    private void generarPoblacion() {
+        for (int i = 0; i < tamPoblacion; i++) {
+            poblacion.add(new Individuo(semilla, datos));
+        }
     }
 }
