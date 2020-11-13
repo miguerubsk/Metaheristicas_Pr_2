@@ -29,6 +29,11 @@ public class Individuo {
         this.coste = coste(this.datos);
         this.calculado = true;
     }
+    
+    public void setCromosoma(Vector<Integer> cromosoma) {
+        this.cromosoma = cromosoma;
+        actualizarCoste();
+    }
 
     public Vector<Integer> getCromosoma() {
         return cromosoma;

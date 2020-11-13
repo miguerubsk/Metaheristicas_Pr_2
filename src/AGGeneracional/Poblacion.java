@@ -19,19 +19,26 @@ public class Poblacion {
     private long semilla;
     private CargaDatos datos;
 
-    public Poblacion(int tam, long semilla, CargaDatos datos) {
+    public Poblacion(int tam, long semilla, CargaDatos datos, boolean generar) {
         this.poblacion = new Vector<Individuo>();
         this.tamPoblacion = tam;
         this.semilla = semilla;
         this.datos = datos;
-        generarPoblacion();
+        if (generar) {
+            generarPoblacion();
+        }
     }
 
-//    public Vector<Individuo> getPoblacion() {
-//        return poblacion;
-//    }
-    
-    public Individuo getIndividuo(int i){
+    @Override
+    public String toString() {
+        return "Poblacion{" + "poblacion=" + poblacion + ", tamPoblacion=" + tamPoblacion + ", semilla=" + semilla + ", datos=" + datos + '}';
+    }
+
+    public void addIndividuo(Individuo individuo) {
+        poblacion.add(individuo);
+    }
+
+    public Individuo getIndividuo(int i) {
         return poblacion.get(i);
     }
 
