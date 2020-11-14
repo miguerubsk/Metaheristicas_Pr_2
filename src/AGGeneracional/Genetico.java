@@ -24,14 +24,18 @@ public class Genetico {
     private String operadorCruce;
     private CargaDatos datos;
     private Configurador config;
+    private Integer m;
+    private Long semilla;
 
     public Genetico(CargaDatos datos, Configurador config, Integer m, Long semilla, String operadorCruce) {
-        this.poblacion = new Poblacion(m, semilla, datos, true);
+        this.poblacion = new Poblacion(semilla, datos, true, config);
         this.aleatorio = new Random(semilla);
         this.operadorCruce = operadorCruce;
         this.datos = datos;
-        this.nuevaPoblacion = new Poblacion(m, semilla, datos, false);
+        this.nuevaPoblacion = null;
         this.config = config;
+        this.m = m;
+        this.semilla = semilla;
     }
 
     private Vector<Individuo> seleccionTorneo() {
@@ -51,7 +55,7 @@ public class Genetico {
             } else {
                 seleccion.add(poblacion.getIndividuo(p2));
             }
-        } while (seleccion.size() < poblacion.getTamPoblacion());
+        } while (seleccion.size() < m);
 
         return seleccion;
 
@@ -258,15 +262,42 @@ public class Genetico {
                 int iteracion = 0;
                 int contador = 0;
                 while (iteracion < 50000) {
+                    System.out.println(iteracion);
+                    nuevaPoblacion = new Poblacion(semilla, datos, false, config);
+                    contador = 0;
+
+                    //Elite2
+                    double mayor = 0;
+                    Individuo mejor1 = null;
+                    Individuo mejor2 = null;
+                    for (int i = 0; i < poblacion.getTamPoblacion(); i++) {
+                        if (poblacion.getIndividuo(i).getCoste() > mayor) {
+                            mayor = poblacion.getIndividuo(i).getCoste();
+                            mejor1 = poblacion.getIndividuo(i);
+                        }
+                    }
+
+                    mayor = 0;
+                    for (int i = 0; i < poblacion.getTamPoblacion(); i++) {
+                        if (poblacion.getIndividuo(i).getCoste() > mayor && poblacion.getIndividuo(i) != mejor1) {
+                            mayor = poblacion.getIndividuo(i).getCoste();
+                            mejor2 = poblacion.getIndividuo(i);
+                        }
+                    }
+                    //---------
+
                     Vector<Individuo> seleccion = seleccionTorneo();
+
                     for (int i = 0; i < seleccion.size(); i += 2) {
-                        System.out.println(i);
+//                        System.out.println(i);
                         if (aleatorio.nextDouble() < config.getProb_Cruce()) {
-                            
                             cruce2P(seleccion.get(i), seleccion.get(i + 1));
                             reparar2Puntos(nuevaPoblacion.getIndividuo(contador).getCromosoma(), datos.getMatriz(), datos.getTamSolucion());
                             reparar2Puntos(nuevaPoblacion.getIndividuo(contador + 1).getCromosoma(), datos.getMatriz(), datos.getTamSolucion());
-                            contador+=2;
+                            contador += 2;
+                        } else {
+                            nuevaPoblacion.addIndividuo(seleccion.get(i));
+                            nuevaPoblacion.addIndividuo(seleccion.get(i + 1));
                         }
                     }
 
@@ -274,22 +305,31 @@ public class Genetico {
                         for (int j = 0; j < nuevaPoblacion.getIndividuo(i).getTamCromosoma(); j++) {
                             if (aleatorio.nextDouble() < config.getProb_Mutacion()) {
                                 Mutacion(nuevaPoblacion.getIndividuo(i).getCromosoma(), j, datos.getTamMatriz());
-                                nuevaPoblacion.getIndividuo(i).actualizarCoste();
+                                nuevaPoblacion.getIndividuo(i).setCalculado(false);
                             }
                         }
                     }
 
+                    nuevaPoblacion.addIndividuo(mejor1);
+                    nuevaPoblacion.addIndividuo(mejor2);
                     poblacion = nuevaPoblacion;
 
                     for (int i = 0; i < poblacion.getTamPoblacion(); i++) {
-                        System.out.println("Coste: " + poblacion.getIndividuo(i).getCoste() + "Cromosoma: " + poblacion.getIndividuo(i).getCromosoma().toString());
+                        if (!poblacion.getIndividuo(i).isCalculado()) {
+                            poblacion.getIndividuo(i).actualizarCoste();
+                            iteracion++;
+                        }
+//                        System.out.println("Coste: " + nuevaPoblacion.getIndividuo(i).getCoste() + "Cromosoma: " + nuevaPoblacion.getIndividuo(i).getCromosoma().toString());
                     }
+//                    System.out.println("----------------------------------------------------------------------------------------------------------------------");
                 }
 
                 break;
             case "MPX":
                 break;
         }
-
+        for (int i = 0; i < poblacion.getTamPoblacion(); i++) {
+            System.out.println("Coste: " + nuevaPoblacion.getIndividuo(i).getCoste() + "Cromosoma: " + nuevaPoblacion.getIndividuo(i).getCromosoma().toString());
+        }
     }
 }

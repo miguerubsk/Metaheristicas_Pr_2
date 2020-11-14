@@ -19,6 +19,10 @@ public class Individuo {
     private double coste;
     private Random aleatorio;
     private boolean calculado;
+
+    public void setCalculado(boolean calculado) {
+        this.calculado = calculado;
+    }
     private CargaDatos datos;
     
     public Individuo(long semilla, CargaDatos datos){
@@ -32,7 +36,7 @@ public class Individuo {
     
     public void setCromosoma(Vector<Integer> cromosoma) {
         this.cromosoma = cromosoma;
-        actualizarCoste();
+        this.calculado = false;
     }
 
     public Vector<Integer> getCromosoma() {
@@ -54,6 +58,7 @@ public class Individuo {
     public void actualizarCoste(){
         if(!calculado){
             coste = coste(datos);
+            calculado = true;
         }
     }
     
