@@ -29,10 +29,6 @@ public class Genetico {
     private Vector<Integer> posi, mejor1, mejor2, mejorActual;
     private final String operadorCruce; //Operador de cruce que se usara en la ejecucion
     
-    
-    
-    
-
     public Genetico(CargaDatos datos, Configurador config, Integer m, Long semilla, String operadorCruce, Integer numElite) {
         this.poblacion = new Poblacion(semilla, datos, true, config);
         this.aleatorio = new Random(semilla);
@@ -320,7 +316,7 @@ public class Genetico {
      * @param dist matriz de distancias
      * @param vector una solucion
      * @param m tamaño de la solucion
-     * @return posicion de menor aporte
+     * @return posicion de mayor aporte
      */
     private int MasAporta(double dist[][], Vector<Integer> vector, int m) {
         double peso = 0.0;
