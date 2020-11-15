@@ -26,8 +26,9 @@ public class Genetico {
     private Configurador config;
     private Integer m;
     private Long semilla;
+    private final Integer numElite;
 
-    public Genetico(CargaDatos datos, Configurador config, Integer m, Long semilla, String operadorCruce) {
+    public Genetico(CargaDatos datos, Configurador config, Integer m, Long semilla, String operadorCruce, Integer numElite) {
         this.poblacion = new Poblacion(semilla, datos, true, config);
         this.aleatorio = new Random(semilla);
         this.operadorCruce = operadorCruce;
@@ -36,6 +37,7 @@ public class Genetico {
         this.config = config;
         this.m = m;
         this.semilla = semilla;
+        this.numElite = numElite;
     }
 
     private Vector<Individuo> seleccionTorneo() {
@@ -44,11 +46,10 @@ public class Genetico {
         int p1, p2;
 
         do {
-            p1 = aleatorio.nextInt(poblacion.getTamPoblacion());
-
             do {
+                p1 = aleatorio.nextInt(poblacion.getTamPoblacion());
                 p2 = aleatorio.nextInt(poblacion.getTamPoblacion());
-            } while (p2 == p1);
+            } while (p2 == p1 && seleccion.contains(poblacion.getIndividuo(p1)) && seleccion.contains(poblacion.getIndividuo(p2)));
 
             if (poblacion.getIndividuo(p1).getCoste() > poblacion.getIndividuo(p2).getCoste()) {
                 seleccion.add(poblacion.getIndividuo(p1));
@@ -58,7 +59,6 @@ public class Genetico {
         } while (seleccion.size() < m);
 
         return seleccion;
-
     }
 
     /**
@@ -261,30 +261,12 @@ public class Genetico {
             case "2P":
                 int iteracion = 0;
                 int contador = 0;
-                while (iteracion < 50000) {
-                    System.out.println(iteracion);
+                while (iteracion < config.getEvaluaciones()) {
+//                    System.out.println(iteracion);
                     nuevaPoblacion = new Poblacion(semilla, datos, false, config);
                     contador = 0;
 
-                    //Elite2
-                    double mayor = 0;
-                    Individuo mejor1 = null;
-                    Individuo mejor2 = null;
-                    for (int i = 0; i < poblacion.getTamPoblacion(); i++) {
-                        if (poblacion.getIndividuo(i).getCoste() > mayor) {
-                            mayor = poblacion.getIndividuo(i).getCoste();
-                            mejor1 = poblacion.getIndividuo(i);
-                        }
-                    }
-
-                    mayor = 0;
-                    for (int i = 0; i < poblacion.getTamPoblacion(); i++) {
-                        if (poblacion.getIndividuo(i).getCoste() > mayor && poblacion.getIndividuo(i) != mejor1) {
-                            mayor = poblacion.getIndividuo(i).getCoste();
-                            mejor2 = poblacion.getIndividuo(i);
-                        }
-                    }
-                    //---------
+                    Vector<Individuo> elite = generarElite();
 
                     Vector<Individuo> seleccion = seleccionTorneo();
 
@@ -310,8 +292,9 @@ public class Genetico {
                         }
                     }
 
-                    nuevaPoblacion.addIndividuo(mejor1);
-                    nuevaPoblacion.addIndividuo(mejor2);
+                    for (Individuo individuo : elite) {
+                        nuevaPoblacion.addIndividuo(individuo);
+                    }
                     poblacion = nuevaPoblacion;
 
                     for (int i = 0; i < poblacion.getTamPoblacion(); i++) {
@@ -328,8 +311,42 @@ public class Genetico {
             case "MPX":
                 break;
         }
+        System.out.println("Tamaño poblacion: " + poblacion.getTamPoblacion() + "\n");
         for (int i = 0; i < poblacion.getTamPoblacion(); i++) {
-            System.out.println("Coste: " + nuevaPoblacion.getIndividuo(i).getCoste() + "Cromosoma: " + nuevaPoblacion.getIndividuo(i).getCromosoma().toString());
+            System.out.println("Coste: " + nuevaPoblacion.getIndividuo(i).getCoste() + "\nCromosoma: " + nuevaPoblacion.getIndividuo(i).getCromosoma().toString());
         }
+        System.out.println("a");
+    }
+
+    private Vector<Individuo> generarElite() {
+        Integer generados = 0;
+        Vector<Individuo> elite = new Vector<>();
+        Vector<Integer> posiciones = new Vector<>();
+        do {
+            double mayor = 0;
+            Integer mejor = null;
+
+            for (int i = 0; i < poblacion.getTamPoblacion(); i++) {
+                if (poblacion.getIndividuo(i).getCoste() > mayor && !poblacion.getIndividuo(i).isElite()) {
+                    mayor = poblacion.getIndividuo(i).getCoste();
+                    mejor = i;
+
+                }
+            }
+
+            elite.add(poblacion.getIndividuo(mejor));
+            poblacion.getIndividuo(mejor).setElite(true);
+            posiciones.add(mejor);
+            generados++;
+        } while (generados < numElite);
+        
+        for (Integer posicion : posiciones) {
+            poblacion.getIndividuo(posicion).setElite(false);
+        }
+        
+        for (Individuo individuo : elite) {
+            individuo.setElite(false);
+        }
+        return elite;
     }
 }

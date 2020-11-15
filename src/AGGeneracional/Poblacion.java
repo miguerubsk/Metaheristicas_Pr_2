@@ -8,6 +8,7 @@ package AGGeneracional;
 import java.util.Vector;
 import tools.CargaDatos;
 import tools.Configurador;
+import tools.Random;
 
 /**
  *
@@ -20,6 +21,7 @@ public class Poblacion {
     private long semilla;
     private CargaDatos datos;
     private final Configurador config;
+    private Random aleatorio;
 
     public Poblacion(long semilla, CargaDatos datos, boolean generar, Configurador config) {
         this.poblacion = new Vector<Individuo>();
@@ -27,6 +29,7 @@ public class Poblacion {
         this.semilla = semilla;
         this.datos = datos;
         this.config = config;
+        this.aleatorio = new Random(1231123112);
         if (generar) {
             generarPoblacion();
         }
@@ -52,7 +55,7 @@ public class Poblacion {
 
     private void generarPoblacion() {
         for (int i = 0; i < config.getTamPoblacion(); i++) {
-            poblacion.add(new Individuo(semilla, datos));
+            poblacion.add(new Individuo(semilla + aleatorio.Randint(0, datos.getTamMatriz()), datos));
             tamPoblacion++;
         }
     }

@@ -5,35 +5,35 @@
  */
 package AGGeneracional;
 
-import java.util.Random;
+//import java.util.Random;
 import java.util.Vector;
 import tools.CargaDatos;
+import tools.Random;
 
 /**
  *
  * @author miguerubsk
  */
 public class Individuo {
+
     private Vector<Integer> cromosoma;
     private int tamCromosoma;
     private double coste;
     private Random aleatorio;
     private boolean calculado;
-
-    public void setCalculado(boolean calculado) {
-        this.calculado = calculado;
-    }
+    private boolean elite;
     private CargaDatos datos;
-    
-    public Individuo(long semilla, CargaDatos datos){
+
+    public Individuo(long semilla, CargaDatos datos) {
         this.datos = datos;
         this.aleatorio = new Random(semilla);
         this.tamCromosoma = this.datos.getTamSolucion();
         this.cromosoma = generarCromosomaAleatorio(this.datos.getTamMatriz());
         this.coste = coste(this.datos);
         this.calculado = true;
+        this.elite = false;
     }
-    
+
     public void setCromosoma(Vector<Integer> cromosoma) {
         this.cromosoma = cromosoma;
         this.calculado = false;
@@ -54,14 +54,14 @@ public class Individuo {
     public boolean isCalculado() {
         return calculado;
     }
-    
-    public void actualizarCoste(){
-        if(!calculado){
+
+    public void actualizarCoste() {
+        if (!calculado) {
             coste = coste(datos);
             calculado = true;
         }
     }
-    
+
     /**
      * @brief Genera una solucion aleatoria
      * @param tamañoSolucion tamaño de la solucion
@@ -72,7 +72,8 @@ public class Individuo {
         Vector<Integer> crom = new Vector<Integer>();
 
         while (generados < tamCromosoma) {
-            Integer elemento = aleatorio.nextInt(tamañoMatriz);
+//            Integer elemento = aleatorio.nextInt(tamañoMatriz);
+            Integer elemento = aleatorio.Randint(0, tamañoMatriz - 1);
             if (!crom.contains(elemento)) {
                 crom.add(elemento);
                 generados++;
@@ -80,7 +81,7 @@ public class Individuo {
         }
         return crom;
     }
-    
+
     /**
      * @brief Función que calcula el coste de la solucion
      * @param matriz matriz de distancias
@@ -98,4 +99,18 @@ public class Individuo {
 
         return coste;
     }
+
+    public boolean isElite() {
+        return elite;
+    }
+
+    public void setElite(boolean elite) {
+        this.elite = elite;
+    }
+
+    public void setCalculado(boolean calculado) {
+        this.calculado = calculado;
+    }
+    
+    
 }
