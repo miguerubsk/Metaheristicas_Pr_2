@@ -39,7 +39,12 @@ public class Metaheristicas_Pr_2 {
                         Genetico genetico = new Genetico(Datos.get(k), config, Datos.get(k).getTamSolucion(), config.getSemillas().get(l), config.getTipoCruce().get(i), config.getElite().get(j));
 //                        System.out.println("i: " + i + " j: " + j + " k: " + k);
                         genetico.ejecutar();
-                        System.out.println("metaheristicas_pr_2.Metaheristicas_Pr_2.main()");
+                        System.out.println("EJECUCION TERMINADA"
+                                + "\nFichero: " + Datos.get(k).getNombreFichero()
+                                + "\nSemilla: " + config.getSemillas().get(l)
+                                + "\nTipo de cruce: " + config.getTipoCruce().get(i)
+                                + "\nNum de elite: " + config.getElite().get(j)
+                                + "\n---------------------------------------------");
                     }
                 }
             }
