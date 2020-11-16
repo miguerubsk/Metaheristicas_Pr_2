@@ -6,6 +6,7 @@
 package AGGeneracional;
 
 import java.util.Vector;
+import java.util.concurrent.*;
 import tools.CargaDatos;
 import tools.Configurador;
 import tools.Random;
@@ -40,7 +41,11 @@ public class Poblacion {
         return "Poblacion{" + "poblacion=" + poblacion + ", tamPoblacion=" + tamPoblacion + ", semilla=" + semilla + ", datos=" + datos + '}';
     }
 
-    public void addIndividuo(Individuo individuo) {
+    public void addIndividuo(Individuo individuo) throws Exception {
+//        if (tamPoblacion >= tamPoblacion + 2) {
+//            Exception excepcion = new Exception("El tamaño de la poblacion no puede ser mayor que " + String.valueOf(tamPoblacion + 2));
+//            throw excepcion;
+//        }
         poblacion.add(individuo);
         tamPoblacion++;
     }

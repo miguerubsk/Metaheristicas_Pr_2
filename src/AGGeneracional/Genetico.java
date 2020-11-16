@@ -7,6 +7,7 @@ package AGGeneracional;
 
 import java.util.Random;
 import java.util.Vector;
+import java.util.concurrent.ExecutionException;
 import tools.CargaDatos;
 import tools.Configurador;
 
@@ -18,25 +19,26 @@ public class Genetico {
 
     private final CargaDatos datos; //Datos para realizar la ejecucion
     private final Configurador config; //Archivo de configuracion
-    private final Integer m; //Tamaño de la solucion
+    private final Integer tamSolucion; //Tamaño de la solucion
     private final Long semilla; //Semilla para inicializacion del aleatorio
     private final Integer numElite; //Numero de elementos que formaran la elite
-    
+
     private final Random aleatorio; //Genera aleatorios
     private int t = 0, conte = 0, peorCo1, peorCo2, mejorCo1, mejorCo2, posPeor1, posPeor2;
     float mejorCosteGlobal = -1;
     private Poblacion poblacion, nuevaPoblacion; //Poblacion actual, y nueva poblacion con la que iremos trabajando
     private Vector<Integer> posi, mejor1, mejor2, mejorActual;
     private final String operadorCruce; //Operador de cruce que se usara en la ejecucion
-    
-    public Genetico(CargaDatos datos, Configurador config, Integer m, Long semilla, String operadorCruce, Integer numElite) {
+    private Individuo mejorIndividuo;
+
+    public Genetico(CargaDatos datos, Configurador config, Long semilla, String operadorCruce, Integer numElite) {
         this.poblacion = new Poblacion(semilla, datos, true, config);
         this.aleatorio = new Random(semilla);
         this.operadorCruce = operadorCruce;
         this.datos = datos;
         this.nuevaPoblacion = null;
         this.config = config;
-        this.m = m;
+        this.tamSolucion = datos.getTamSolucion();
         this.semilla = semilla;
         this.numElite = numElite;
     }
@@ -44,14 +46,14 @@ public class Genetico {
     /**
      * @brief Realiza la ejecucion del algoritmo
      */
-    public void ejecutar() {
+    public void ejecutar() throws Exception {
 
         switch (operadorCruce) {
             case "2P":
                 int iteracion = 0;
                 int contador;
                 /*Ejecutamos el algoritmo hasta que se complete el numero de iteraciones*/
-                while (iteracion < config.getEvaluaciones()) {
+                while (iteracion < 300) {
                     nuevaPoblacion = new Poblacion(semilla, datos, false, config); //Creamos una nueva poblacion para trabajar sobre ella
                     contador = 0;
 
@@ -73,7 +75,7 @@ public class Genetico {
                             nuevaPoblacion.addIndividuo(seleccion.get(i + 1));
                         }
                     }
-
+                  
                     /*Realizamos la mutacion para cada elemento de los cromosomas de cada individuo.
                     Esta mutacion tiene una probabilidad de 0.05.*/
                     for (int i = 0; i < nuevaPoblacion.getTamPoblacion(); i++) {
@@ -84,6 +86,7 @@ public class Genetico {
                             }
                         }
                     }
+                    
 
                     /*Añadimos los individuos elite*/
                     for (Individuo individuo : elite) {
@@ -92,12 +95,16 @@ public class Genetico {
 
                     /*Sustituimos la poblacion anterior con la nueva poblacion*/
                     poblacion = nuevaPoblacion;
+                                        
+                    if(poblacion.getTamPoblacion() == 92){
+//                        System.out.println("AGGeneracional.Genetico.ejecutar()");
+                    }
 
                     /*Calculamos los costes de cada individuo si este no los tiene actualizados*/
                     for (int i = 0; i < poblacion.getTamPoblacion(); i++) {
                         if (!poblacion.getIndividuo(i).isCalculado()) {
                             poblacion.getIndividuo(i).actualizarCoste();
-                            
+
                             iteracion++; //Sumamos una iteracion por cada calculo del coste
                         }
                     }
@@ -106,17 +113,31 @@ public class Genetico {
                 break;
 
             case "MPX":
+                System.out.println("AGGeneracional.Genetico.ejecutar()");
                 break;
         }
 
-        System.out.println("Tamaño poblacion: " + poblacion.getTamPoblacion() + "\n");
-        for (int i = 0; i < poblacion.getTamPoblacion(); i++) {
-            System.out.println("Coste: " + nuevaPoblacion.getIndividuo(i).getCoste() + "\nCromosoma: " + nuevaPoblacion.getIndividuo(i).getCromosoma().toString());
-        }
-    }
-    
-    //Funciones auxiliares
+        /*Guardamos el individuo con mejor coste como el mejor individuo de toda la poblacion*/
+        double mayor = 0;
+        Integer mejor = null;
 
+        for (int i = 0; i < poblacion.getTamPoblacion(); i++) {
+            if (poblacion.getIndividuo(i).getCoste() > mayor) {
+                mayor = poblacion.getIndividuo(i).getCoste();
+                mejor = i;
+
+            }
+        }
+
+        mejorIndividuo = poblacion.getIndividuo(mejor);
+
+//        System.out.println("Tamaño poblacion: " + poblacion.getTamPoblacion() + "\n");
+//        for (int i = 0; i < poblacion.getTamPoblacion(); i++) {
+//            System.out.println("Coste: " + nuevaPoblacion.getIndividuo(i).getCoste() + "\nCromosoma: " + nuevaPoblacion.getIndividuo(i).getCromosoma().toString());
+//        }
+    }
+
+    //Funciones auxiliares
     /**
      * @brief Realiza una seleccion por torneo con k = 2
      * @return vector con la seleccion de los individuos
@@ -137,7 +158,7 @@ public class Genetico {
             } else {
                 seleccion.add(poblacion.getIndividuo(p2));
             }
-        } while (seleccion.size() < m);
+        } while (seleccion.size() < config.getTamPoblacion());
 
         return seleccion;
     }
@@ -335,6 +356,7 @@ public class Genetico {
             }
             peso = 0.0;
         }
+
         return posMayor;
     }
 
@@ -377,6 +399,15 @@ public class Genetico {
         for (Individuo individuo : elite) {
             individuo.setElite(false);
         }
+
         return elite;
+    }
+
+    public Individuo getMejorIndividuo() {
+        return mejorIndividuo;
+    }
+
+    public int getTamPoblacion() {
+        return poblacion.getTamPoblacion();
     }
 }
