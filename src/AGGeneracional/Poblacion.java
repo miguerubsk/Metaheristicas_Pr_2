@@ -58,9 +58,15 @@ public class Poblacion {
         return tamPoblacion;
     }
 
+    public void removeIndividuo(int i) {
+        poblacion.remove(i);
+        tamPoblacion--;
+    }
+    
     private void generarPoblacion() {
         for (int i = 0; i < config.getTamPoblacion(); i++) {
-            poblacion.add(new Individuo(semilla + aleatorio.Randint(0, datos.getTamMatriz()), datos));
+            Individuo nuevoIndividuo = new Individuo(semilla + aleatorio.Randint(0, datos.getTamMatriz()), datos);
+            poblacion.add(nuevoIndividuo);
             tamPoblacion++;
         }
     }
