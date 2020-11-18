@@ -9,7 +9,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Random;
 import java.util.Vector;
-import java.util.concurrent.ExecutionException;
 import tools.CargaDatos;
 import tools.Configurador;
 import tools.GuardarLog;
@@ -80,8 +79,8 @@ public class Genetico {
                         for (int i = 0; i < seleccion.size(); i += 2) {
                             if (aleatorio.nextDouble() < config.getProb_Cruce()) {
                                 cruce2P(seleccion.get(i), seleccion.get(i + 1));
-                                reparar2Puntos(nuevaPoblacion.getIndividuo(contador).getCromosoma(), datos.getMatriz(), datos.getTamSolucion());
-                                reparar2Puntos(nuevaPoblacion.getIndividuo(contador + 1).getCromosoma(), datos.getMatriz(), datos.getTamSolucion());
+                                reparar2Puntos(nuevaPoblacion.getIndividuo(contador).getCromosoma(), datos.getMatriz());
+                                reparar2Puntos(nuevaPoblacion.getIndividuo(contador + 1).getCromosoma(), datos.getMatriz());
                                 contador += 2;
                             } else {
                                 nuevaPoblacion.addIndividuo(seleccion.get(i));
@@ -331,7 +330,7 @@ public class Genetico {
      * @param dist matriz de distancias
      * @param n tamaño solucion
      */
-    private void reparar2Puntos(Vector<Integer> a, double dist[][], int n) {
+    private void reparar2Puntos(Vector<Integer> a, double dist[][]) {
         log.escribir("REPARACION INICIADA\n" + "Cromosoma a reparar: " + a.toString());
         try {
             Vector<Integer> r = new Vector<Integer>();
@@ -349,9 +348,9 @@ public class Genetico {
                     r.add(a.get(i));
                 }
             }
-            int x = a.size() - r.size();
+            int x = datos.getTamSolucion() - r.size();
             for (int i = 0; i < x; i++) {
-                int ele = masAporta(dist, a, n);
+                int ele = masAporta(dist, a, datos.getTamSolucion());
                 a.add(a.get(ele));
             }
         } catch (Exception e) {
