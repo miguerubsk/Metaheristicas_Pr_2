@@ -7,7 +7,6 @@ package AGGeneracional;
 
 import java.util.Random;
 import java.util.Vector;
-import java.util.concurrent.ExecutionException;
 import tools.CargaDatos;
 import tools.Configurador;
 
@@ -24,10 +23,9 @@ public class Genetico {
     private final Integer numElite; //Numero de elementos que formaran la elite
 
     private final Random aleatorio; //Genera aleatorios
-    private int t = 0, conte = 0, peorCo1, peorCo2, mejorCo1, mejorCo2, posPeor1, posPeor2;
+    private int t = 0, conte = 0;
     float mejorCosteGlobal = -1;
-    private Poblacion poblacion, nuevaPoblacion; //Poblacion actual, y nueva poblacion con la que iremos trabajando
-    private Vector<Integer> posi, mejor1, mejor2, mejorActual;
+    private Poblacion poblacion, nuevaPoblacion; //Poblacion actual, y nueva poblacion con la que iremos trabajando;
     private final String operadorCruce; //Operador de cruce que se usara en la ejecucion
     private Individuo mejorIndividuo;
 
@@ -66,8 +64,8 @@ public class Genetico {
                     for (int i = 0; i < seleccion.size(); i += 2) {
                         if (aleatorio.nextDouble() < config.getProb_Cruce()) {
                             cruce2P(seleccion.get(i), seleccion.get(i + 1));
-                            reparar2Puntos(nuevaPoblacion.getIndividuo(contador).getCromosoma(), datos.getMatriz(), datos.getTamSolucion());
-                            reparar2Puntos(nuevaPoblacion.getIndividuo(contador + 1).getCromosoma(), datos.getMatriz(), datos.getTamSolucion());
+                            reparar2Puntos(nuevaPoblacion.getIndividuo(contador).getCromosoma(), datos.getMatriz());
+                            reparar2Puntos(nuevaPoblacion.getIndividuo(contador + 1).getCromosoma(), datos.getMatriz());
                             contador += 2;
                         } else {
                             nuevaPoblacion.addIndividuo(seleccion.get(i));
@@ -274,7 +272,7 @@ public class Genetico {
      * @param dist matriz de distancias
      * @param n tamaño solucion
      */
-    private void reparar2Puntos(Vector<Integer> a, double dist[][], int n) {
+    private void reparar2Puntos(Vector<Integer> a, double dist[][]) {
         try {
             Vector<Integer> r = new Vector<Integer>();
 
@@ -291,9 +289,9 @@ public class Genetico {
                     r.add(a.get(i));
                 }
             }
-            int x = a.size() - r.size();
+            int x = datos.getTamSolucion() - r.size();
             for (int i = 0; i < x; i++) {
-                int ele = MasAporta(dist, a, n);
+                int ele = MasAporta(dist, a, datos.getTamSolucion());
                 a.add(a.get(ele));
             }
         } catch (Exception e) {
