@@ -42,10 +42,6 @@ public class Poblacion {
     }
 
     public void addIndividuo(Individuo individuo) throws Exception {
-//        if (tamPoblacion >= tamPoblacion + 2) {
-//            Exception excepcion = new Exception("El tamaño de la poblacion no puede ser mayor que " + String.valueOf(tamPoblacion + 2));
-//            throw excepcion;
-//        }
         poblacion.add(individuo);
         tamPoblacion++;
     }
