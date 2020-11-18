@@ -4,3 +4,6 @@ nbproject/private/private.xml
 nbproject/private/private.properties
 /log/
 *0.txt
+nbproject/genfiles.properties
+
+nbproject/build-impl.xml

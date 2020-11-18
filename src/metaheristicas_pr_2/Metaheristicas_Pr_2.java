@@ -5,6 +5,17 @@
  */
 package metaheristicas_pr_2;
 
+import AGGeneracional.Genetico;
+import java.util.ArrayList;
+import java.util.Vector;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import tools.CargaDatos;
+import tools.Configurador;
+
 /**
  *
  * @author Miguerubsk
@@ -15,7 +26,39 @@ public class Metaheristicas_Pr_2 {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        // TODO code application logic here
+        //Cargamos el archivo de configuracion
+        Configurador config = new Configurador("config.txt");
+
+        //Cargamos los ficheros de datos
+        ArrayList<CargaDatos> Datos = new ArrayList<>();
+        for (int i = 0; i < config.getFicheros().size(); i++) {
+            Datos.add(new CargaDatos(config.getFicheros().get(i)));
+        }
+
+        for (int i = 0; i < config.getTipoCruce().size(); i++) {
+            for (int j = 0; j < config.getElite().size(); j++) {
+                for (int k = 0; k < Datos.size(); k++) {
+                    for (int l = 0; l < config.getSemillas().size(); l++) {
+                        Genetico genetico = new Genetico(Datos.get(k), config, config.getSemillas().get(l), config.getTipoCruce().get(i), config.getElite().get(j));
+                        try {
+                            //                        System.out.println("i: " + i + " j: " + j + " k: " + k);
+                            genetico.ejecutar();
+                        } catch (Exception ex) {
+                            Logger.getLogger(Metaheristicas_Pr_2.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                        System.out.println("EJECUCION TERMINADA"
+                                + "\nFichero: " + Datos.get(k).getNombreFichero()
+                                + "\nSemilla: " + config.getSemillas().get(l)
+                                + "\nTipo de cruce: " + config.getTipoCruce().get(i)
+                                + "\nNum de elite: " + config.getElite().get(j)
+                                + "\nMejor individuo: " + genetico.getMejorIndividuo().getCromosoma().toString()
+                                + "\nTamaño cromosoma: " + genetico.getMejorIndividuo().getCromosoma().size()
+                                + "\nCoste mejor individuo: " + genetico.getMejorIndividuo().getCoste()
+                                + "\nTamaño poblacion final: " + genetico.getTamPoblacion()
+                                + "\n---------------------------------------------");
+                    }
+                }
+            }
+        }
     }
-    
 }
