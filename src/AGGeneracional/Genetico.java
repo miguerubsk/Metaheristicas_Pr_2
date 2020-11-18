@@ -85,7 +85,10 @@ public class Genetico {
                                 contador += 2;
                             } else {
                                 nuevaPoblacion.addIndividuo(seleccion.get(i));
+                                log.escribir("AÑADIDO INDIVIDUO SIN CRUCE: " + seleccion.get(i).getCromosoma());
+
                                 nuevaPoblacion.addIndividuo(seleccion.get(i + 1));
+                                log.escribir("AÑADIDO INDIVIDUO SIN CRUCE: " + seleccion.get(i + 1).getCromosoma());
                             }
                         }
 
@@ -119,6 +122,8 @@ public class Genetico {
                         }
 
                         eliminarIndividuosSobrantes(poblacion);
+                        
+                        log.escribir("NUMERO DE EVALUACIONES REALIZADAS: " + iteracion);
                     }
 
                     break;
@@ -157,7 +162,6 @@ public class Genetico {
                         }
 
                         eliminarIndividuosSobrantes(poblacion);
-                        iteracion -= numElite;
                     }
 
                     break;
@@ -201,6 +205,7 @@ public class Genetico {
      * @return vector con la seleccion de los individuos
      */
     private Vector<Individuo> seleccionTorneo() {
+        log.escribir("SELECCION POR TORNEO INICIADA (k=2)");
 
         Vector<Individuo> seleccion = new Vector<>();
         int p1, p2;
@@ -216,7 +221,13 @@ public class Genetico {
             } else {
                 seleccion.add(poblacion.getIndividuo(p2));
             }
+
         } while (seleccion.size() < config.getTamPoblacion());
+
+        log.escribirNoInfo("SELECCION TERMINADA\nELEMENTOS SELECCIONADOS:");
+        for (Individuo individuo : seleccion) {
+            log.escribirNoInfo("Cromosoma: " + individuo.getCromosoma().toString() + " Coste: " + individuo.getCoste());
+        }
 
         return seleccion;
     }
@@ -293,12 +304,16 @@ public class Genetico {
      * @param n rango de valores de la mutacion
      */
     private void mutacion(Vector<Integer> v, int p, int n) {
+        log.escribir("MUTACION INICIADA" + "\nPosicion a mutar: " + p + " Valor antes de mutacion: " + v.get(p));
+        
         int x = 0;
         do {
             x = aleatorio.nextInt(n);
         } while (v.contains(x));
 
         intercambia(p, x, v);
+
+        log.escribirNoInfo("MUTACION TERMINADA" + "\nPosicion mutada: " + p + " Valor tras la mutacion: " + v.get(p));
     }
 
     /**
@@ -308,6 +323,7 @@ public class Genetico {
      * @param n tamaño solucion
      */
     private void reparar2Puntos(Vector<Integer> a, double dist[][], int n) {
+        log.escribir("REPARACION INICIADA\n" + "Cromosoma a reparar: " + a.toString());
         try {
             Vector<Integer> r = new Vector<Integer>();
 
@@ -332,6 +348,8 @@ public class Genetico {
         } catch (Exception e) {
             System.err.println("AGGeneracional.Genetico.reparar2Puntos(): " + e.toString());
         }
+
+        log.escribirNoInfo("REPARACION TERMINADA\n" + "Cromosoma reparado: " + a.toString());
     }
 
     //@TODO
@@ -460,6 +478,7 @@ public class Genetico {
         Integer generados = 0;
         Vector<Individuo> elite = new Vector<>();
         Vector<Integer> posiciones = new Vector<>();
+        log.escribir("GENERANDO ELITE");
         do {
             double mayor = 0;
             Integer mejor = null;
@@ -475,6 +494,7 @@ public class Genetico {
             poblacion.getIndividuo(mejor).setElite(true);
             posiciones.add(mejor);
             generados++;
+            log.escribirNoInfo("ELITE " + generados + ". Cromosoma: " + poblacion.getIndividuo(mejor).getCromosoma() + " Coste: " + poblacion.getIndividuo(mejor).getCoste());
         } while (generados < numElite);
 
         for (Integer posicion : posiciones) {
@@ -485,6 +505,7 @@ public class Genetico {
             individuo.setElite(false);
         }
 
+        log.escribirNoInfo("ELITE GENERADA");
         return elite;
     }
 
