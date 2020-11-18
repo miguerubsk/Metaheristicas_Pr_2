@@ -59,13 +59,16 @@ public class Genetico {
      * @brief Realiza la ejecucion del algoritmo
      */
     public void ejecutar() throws Exception {
+        int evaluaciones = 0;
         int iteracion = 0;
         try {
             switch (operadorCruce) {
                 case "2P":
+
                     int contador;
                     /*Ejecutamos el algoritmo hasta que se complete el numero de iteraciones*/
-                    while (iteracion < 300) {
+                    while (evaluaciones < config.getEvaluaciones()) {
+                        log.escribir("NUMERO DE ITERACION: " + iteracion);
                         nuevaPoblacion = new Poblacion(semilla, datos, false, config); //Creamos una nueva poblacion para trabajar sobre ella
                         contador = 0;
 
@@ -116,19 +119,21 @@ public class Genetico {
                             if (!poblacion.getIndividuo(i).isCalculado()) {
                                 poblacion.getIndividuo(i).actualizarCoste();
 
-                                iteracion++; //Sumamos una iteracion por cada calculo del coste
+                                evaluaciones++; //Sumamos una iteracion por cada calculo del coste
                             }
                         }
 
                         eliminarIndividuosSobrantes(poblacion);
 
-                        log.escribir("NUMERO DE EVALUACIONES REALIZADAS: " + iteracion);
+                        log.escribir("NUMERO DE EVALUACIONES REALIZADAS: " + evaluaciones);
+                        iteracion++;
                     }
 
                     break;
 
                 case "MPX":
-                    while (iteracion < 300) {
+                    while (evaluaciones < config.getEvaluaciones()) {
+                        log.escribir("NUMERO DE ITERACION: " + iteracion);
                         Vector<Individuo> elite = generarElite(); //Generamos la elite de la actual generacion 
 
                         for (int i = 0; i < poblacion.getTamPoblacion(); i += 2) {
@@ -156,13 +161,14 @@ public class Genetico {
                             if (!poblacion.getIndividuo(i).isCalculado()) {
                                 poblacion.getIndividuo(i).actualizarCoste();
 
-                                iteracion++; //Sumamos una iteracion por cada calculo del coste
+                                evaluaciones++; //Sumamos una iteracion por cada calculo del coste
                             }
                         }
 
                         eliminarIndividuosSobrantes(poblacion);
-                        
-                        log.escribir("NUMERO DE EVALUACIONES REALIZADAS: " + iteracion);
+
+                        log.escribir("NUMERO DE EVALUACIONES REALIZADAS: " + evaluaciones);
+                        iteracion++;
                     }
 
                     break;
@@ -363,7 +369,7 @@ public class Genetico {
     //@TODO
     private void repararMPX(Vector<Integer> a, double dist[][], int m) {
         log.escribir("REPARACION INICIADA\n" + "Cromosoma a reparar: " + a.toString());
-        
+
         int dif = a.size() - m;
         for (int i = 0; i < dif; i++) {
             int p = menorAporte(a.size(), dist, a);
@@ -387,7 +393,7 @@ public class Genetico {
         }
 
         a = r;
-        
+
         log.escribirNoInfo("REPARACION TERMINADA\n" + "Cromosoma reparado: " + a.toString());
     }
 
@@ -532,7 +538,7 @@ public class Genetico {
 
     private void eliminarIndividuosSobrantes(Poblacion poblacion) {
         log.escribir("ELIMINAR ELEMENTOS SOBRANTES DE LA POBLACION");
-        
+
         int dif = poblacion.getTamPoblacion() - config.getTamPoblacion();
         for (int i = 0; i < dif; i++) {
             double menorCoste = 999999999;
@@ -544,8 +550,8 @@ public class Genetico {
                     pos = j;
                 }
             }
-            
-            log.escribirNoInfo("ELEMENTO ELIMINADO: "+ poblacion.getIndividuo(pos).getCromosoma().toString() + " Coste: " + poblacion.getIndividuo(pos).getCoste());
+
+            log.escribirNoInfo("ELEMENTO ELIMINADO: " + poblacion.getIndividuo(pos).getCromosoma().toString() + " Coste: " + poblacion.getIndividuo(pos).getCoste());
             poblacion.removeIndividuo(pos);
         }
     }
