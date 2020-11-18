@@ -122,7 +122,7 @@ public class Genetico {
                         }
 
                         eliminarIndividuosSobrantes(poblacion);
-                        
+
                         log.escribir("NUMERO DE EVALUACIONES REALIZADAS: " + iteracion);
                     }
 
@@ -162,6 +162,8 @@ public class Genetico {
                         }
 
                         eliminarIndividuosSobrantes(poblacion);
+                        
+                        log.escribir("NUMERO DE EVALUACIONES REALIZADAS: " + iteracion);
                     }
 
                     break;
@@ -290,8 +292,15 @@ public class Genetico {
      * @param prob probabilidad de que se realize el cruce
      */
     private void cruceMPX(Vector<Integer> a, Vector<Integer> b, int prob) {
+
+        log.escribir("CRUCE INICIADO\n" + "Cromosoma padre 1: " + a.toString() + "\nCromosoma padre 2: " + b.toString());
+
         Vector<Integer> crom1 = obtenerHijoMPX(a, b, prob);
         Vector<Integer> crom2 = obtenerHijoMPX(a, b, prob);
+
+        log.escribirNoInfo("CRUCE TERMINADO"
+                + "\nHIJO 1: " + crom1.toString()
+                + "\nHIJO 2: " + crom2.toString());
 
         a = crom1;
         b = crom2;
@@ -305,7 +314,7 @@ public class Genetico {
      */
     private void mutacion(Vector<Integer> v, int p, int n) {
         log.escribir("MUTACION INICIADA" + "\nPosicion a mutar: " + p + " Valor antes de mutacion: " + v.get(p));
-        
+
         int x = 0;
         do {
             x = aleatorio.nextInt(n);
@@ -354,6 +363,8 @@ public class Genetico {
 
     //@TODO
     private void repararMPX(Vector<Integer> a, double dist[][], int m) {
+        log.escribir("REPARACION INICIADA\n" + "Cromosoma a reparar: " + a.toString());
+        
         int dif = a.size() - m;
         for (int i = 0; i < dif; i++) {
             int p = menorAporte(a.size(), dist, a);
@@ -377,6 +388,8 @@ public class Genetico {
         }
 
         a = r;
+        
+        log.escribirNoInfo("REPARACION TERMINADA\n" + "Cromosoma reparado: " + a.toString());
     }
 
     /**
@@ -405,6 +418,7 @@ public class Genetico {
                 r.add(b.get(i));
             }
         }
+
         return r;
     }
 
@@ -518,6 +532,8 @@ public class Genetico {
     }
 
     private void eliminarIndividuosSobrantes(Poblacion poblacion) {
+        log.escribir("ELIMINAR ELEMENTOS SOBRANTES DE LA POBLACION");
+        
         int dif = poblacion.getTamPoblacion() - config.getTamPoblacion();
         for (int i = 0; i < dif; i++) {
             double menorCoste = 999999999;
@@ -529,6 +545,8 @@ public class Genetico {
                     pos = j;
                 }
             }
+            
+            log.escribirNoInfo("ELEMENTO ELIMINADO: "+ poblacion.getIndividuo(pos).getCromosoma().toString() + " Coste: " + poblacion.getIndividuo(pos).getCoste());
             poblacion.removeIndividuo(pos);
         }
     }
