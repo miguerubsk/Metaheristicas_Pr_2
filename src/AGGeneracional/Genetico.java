@@ -5,11 +5,14 @@
  */
 package AGGeneracional;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Random;
 import java.util.Vector;
 import java.util.concurrent.ExecutionException;
 import tools.CargaDatos;
 import tools.Configurador;
+import tools.GuardarLog;
 
 /**
  *
@@ -24,12 +27,10 @@ public class Genetico {
     private final Integer numElite; //Numero de elementos que formaran la elite
 
     private final Random aleatorio; //Genera aleatorios
-    private int t = 0, conte = 0, peorCo1, peorCo2, mejorCo1, mejorCo2, posPeor1, posPeor2;
-    float mejorCosteGlobal = -1;
     private Poblacion poblacion, nuevaPoblacion; //Poblacion actual, y nueva poblacion con la que iremos trabajando
-    private Vector<Integer> posi, mejor1, mejor2, mejorActual;
     private final String operadorCruce; //Operador de cruce que se usara en la ejecucion
     private Individuo mejorIndividuo;
+    private final GuardarLog log;
 
     public Genetico(CargaDatos datos, Configurador config, Long semilla, String operadorCruce, Integer numElite) {
         this.poblacion = new Poblacion(semilla, datos, true, config);
@@ -41,6 +42,18 @@ public class Genetico {
         this.tamSolucion = datos.getTamSolucion();
         this.semilla = semilla;
         this.numElite = numElite;
+
+        String ruta = operadorCruce + "_elite" + numElite + "_" + datos.getNombreFichero() + "_" + semilla;
+        String info = "[EJECUCION INICIADA]\n"
+                + "Archivo: " + datos.getNombreFichero()
+                + "\nSemilla: " + semilla
+                + "\nOperadorCruce: " + operadorCruce
+                + "\nNumElite: " + numElite
+                + "\nTamaño matriz: " + datos.getTamMatriz()
+                + "\nTamañoSolucion: " + datos.getTamSolucion()
+                + "\nTamañoPoblacion: " + config.getTamPoblacion();
+
+        this.log = new GuardarLog(ruta, info, operadorCruce);
     }
 
     /**
@@ -48,109 +61,110 @@ public class Genetico {
      */
     public void ejecutar() throws Exception {
         int iteracion = 0;
-        switch (operadorCruce) {
-            case "2P":
-                int contador;
-                /*Ejecutamos el algoritmo hasta que se complete el numero de iteraciones*/
-                while (iteracion < 300) {
-                    nuevaPoblacion = new Poblacion(semilla, datos, false, config); //Creamos una nueva poblacion para trabajar sobre ella
-                    contador = 0;
-                            
-                    Vector<Individuo> elite = generarElite(); //Generamos la elite de la actual generacion 
-                    
-                    Vector<Individuo> seleccion = seleccionTorneo(); //Realizamos la seleccion por torneo
+        try {
+            switch (operadorCruce) {
+                case "2P":
+                    int contador;
+                    /*Ejecutamos el algoritmo hasta que se complete el numero de iteraciones*/
+                    while (iteracion < 300) {
+                        nuevaPoblacion = new Poblacion(semilla, datos, false, config); //Creamos una nueva poblacion para trabajar sobre ella
+                        contador = 0;
 
-                    /*Realizamos el cruce y su reparacion para cada uno de los elementos de la seleccion.+
-                    Se realizará el cruce y reparacion con probabilidad 0.7.
-                    Si no se realiza cruce, el individuo es añadido sin realizar su cruce.*/
-                    for (int i = 0; i < seleccion.size(); i += 2) {
-                        if (aleatorio.nextDouble() < config.getProb_Cruce()) {
-                            cruce2P(seleccion.get(i), seleccion.get(i + 1));
-                            reparar2Puntos(nuevaPoblacion.getIndividuo(contador).getCromosoma(), datos.getMatriz(), datos.getTamSolucion());
-                            reparar2Puntos(nuevaPoblacion.getIndividuo(contador + 1).getCromosoma(), datos.getMatriz(), datos.getTamSolucion());
-                            contador += 2;
-                        } else {
-                            nuevaPoblacion.addIndividuo(seleccion.get(i));
-                            nuevaPoblacion.addIndividuo(seleccion.get(i + 1));
-                        }
-                    }
+                        Vector<Individuo> elite = generarElite(); //Generamos la elite de la actual generacion 
 
-                    /*Realizamos la mutacion para cada elemento de los cromosomas de cada individuo.
-                    Esta mutacion tiene una probabilidad de 0.05.*/
-                    for (int i = 0; i < nuevaPoblacion.getTamPoblacion(); i++) {
-                        for (int j = 0; j < nuevaPoblacion.getIndividuo(i).getTamCromosoma(); j++) {
-                            if (aleatorio.nextDouble() < config.getProb_Mutacion()) {
-                                Mutacion(nuevaPoblacion.getIndividuo(i).getCromosoma(), j, datos.getTamMatriz());
-                                nuevaPoblacion.getIndividuo(i).setCalculado(false);
+                        Vector<Individuo> seleccion = seleccionTorneo(); //Realizamos la seleccion por torneo
+
+                        /*Realizamos el cruce y su reparacion para cada uno de los elementos de la seleccion.+
+                        Se realizará el cruce y reparacion con probabilidad 0.7.
+                        Si no se realiza cruce, el individuo es añadido sin realizar su cruce.*/
+                        for (int i = 0; i < seleccion.size(); i += 2) {
+                            if (aleatorio.nextDouble() < config.getProb_Cruce()) {
+                                cruce2P(seleccion.get(i), seleccion.get(i + 1));
+                                reparar2Puntos(nuevaPoblacion.getIndividuo(contador).getCromosoma(), datos.getMatriz(), datos.getTamSolucion());
+                                reparar2Puntos(nuevaPoblacion.getIndividuo(contador + 1).getCromosoma(), datos.getMatriz(), datos.getTamSolucion());
+                                contador += 2;
+                            } else {
+                                nuevaPoblacion.addIndividuo(seleccion.get(i));
+                                nuevaPoblacion.addIndividuo(seleccion.get(i + 1));
                             }
                         }
-                    }
 
-
-                    /*Añadimos los individuos elite*/
-                    for (Individuo individuo : elite) {
-                        nuevaPoblacion.addIndividuo(individuo);
-                    }
-
-                    /*Sustituimos la poblacion anterior con la nueva poblacion*/
-                    poblacion = nuevaPoblacion;
-
-                    /*Calculamos los costes de cada individuo si este no los tiene actualizados*/
-                    for (int i = 0; i < poblacion.getTamPoblacion(); i++) {
-                        if (!poblacion.getIndividuo(i).isCalculado()) {
-                            poblacion.getIndividuo(i).actualizarCoste();
-
-                            iteracion++; //Sumamos una iteracion por cada calculo del coste
-                        }
-                    }
-                    
-                    eliminarIndividuosSobrantes(poblacion);
-                }
-
-                break;
-
-            case "MPX":
-                while (iteracion < 300) {
-                    Vector<Individuo> elite = generarElite(); //Generamos la elite de la actual generacion 
-
-                    for (int i = 0; i < poblacion.getTamPoblacion(); i += 2) {
-                        Vector<Integer> crom1 = obtenerHijoMPX(poblacion.getIndividuo(i).getCromosoma(), poblacion.getIndividuo(i + 1).getCromosoma(), (int) config.getProb_Cruce() * 100);
-                        Vector<Integer> crom2 = obtenerHijoMPX(poblacion.getIndividuo(i).getCromosoma(), poblacion.getIndividuo(i + 1).getCromosoma(), (int) config.getProb_Cruce() * 100);
-
-                        poblacion.getIndividuo(i).setCromosoma(crom1);
-                        poblacion.getIndividuo(i + 1).setCromosoma(crom2);
-
-                        repararMPX(poblacion.getIndividuo(i).getCromosoma(), datos.getMatriz(), datos.getTamSolucion());
-                        repararMPX(poblacion.getIndividuo(i + 1).getCromosoma(), datos.getMatriz(), datos.getTamSolucion());
-                    }
-
-                    for (int i = 0; i < poblacion.getTamPoblacion(); i++) {
-                        for (int j = 0; j < poblacion.getIndividuo(i).getTamCromosoma(); j++) {
-                            if (aleatorio.nextDouble() < config.getProb_Mutacion()) {
-                                Mutacion(poblacion.getIndividuo(i).getCromosoma(), j, datos.getTamMatriz());
-                                poblacion.getIndividuo(i).setCalculado(false);
+                        /*Realizamos la mutacion para cada elemento de los cromosomas de cada individuo.
+                        Esta mutacion tiene una probabilidad de 0.05.*/
+                        for (int i = 0; i < nuevaPoblacion.getTamPoblacion(); i++) {
+                            for (int j = 0; j < nuevaPoblacion.getIndividuo(i).getTamCromosoma(); j++) {
+                                if (aleatorio.nextDouble() < config.getProb_Mutacion()) {
+                                    mutacion(nuevaPoblacion.getIndividuo(i).getCromosoma(), j, datos.getTamMatriz());
+                                    nuevaPoblacion.getIndividuo(i).setCalculado(false);
+                                }
                             }
                         }
-                    }
 
-                    /*Añadimos los individuos elite*/
-                    for (Individuo individuo : elite) {
-                        poblacion.addIndividuo(individuo);
-                    }
 
-                    for (int i = 0; i < poblacion.getTamPoblacion(); i++) {
-                        if (!poblacion.getIndividuo(i).isCalculado()) {
-                            poblacion.getIndividuo(i).actualizarCoste();
-
-                            iteracion++; //Sumamos una iteracion por cada calculo del coste
+                        /*Añadimos los individuos elite*/
+                        for (Individuo individuo : elite) {
+                            nuevaPoblacion.addIndividuo(individuo);
                         }
+
+                        /*Sustituimos la poblacion anterior con la nueva poblacion*/
+                        poblacion = nuevaPoblacion;
+
+                        /*Calculamos los costes de cada individuo si este no los tiene actualizados*/
+                        for (int i = 0; i < poblacion.getTamPoblacion(); i++) {
+                            if (!poblacion.getIndividuo(i).isCalculado()) {
+                                poblacion.getIndividuo(i).actualizarCoste();
+
+                                iteracion++; //Sumamos una iteracion por cada calculo del coste
+                            }
+                        }
+
+                        eliminarIndividuosSobrantes(poblacion);
                     }
-                    
-                    eliminarIndividuosSobrantes(poblacion);
-                    iteracion -= numElite;
-                }
-                
-                break;
+
+                    break;
+
+                case "MPX":
+                    while (iteracion < 300) {
+                        Vector<Individuo> elite = generarElite(); //Generamos la elite de la actual generacion 
+
+                        for (int i = 0; i < poblacion.getTamPoblacion(); i += 2) {
+                            cruceMPX(poblacion.getIndividuo(i).getCromosoma(), poblacion.getIndividuo(i + 1).getCromosoma(), (int) config.getProb_Cruce() * 100);
+
+                            repararMPX(poblacion.getIndividuo(i).getCromosoma(), datos.getMatriz(), datos.getTamSolucion());
+                            repararMPX(poblacion.getIndividuo(i + 1).getCromosoma(), datos.getMatriz(), datos.getTamSolucion());
+                        }
+
+                        for (int i = 0; i < poblacion.getTamPoblacion(); i++) {
+                            for (int j = 0; j < poblacion.getIndividuo(i).getTamCromosoma(); j++) {
+                                if (aleatorio.nextDouble() < config.getProb_Mutacion()) {
+                                    mutacion(poblacion.getIndividuo(i).getCromosoma(), j, datos.getTamMatriz());
+                                    poblacion.getIndividuo(i).setCalculado(false);
+                                }
+                            }
+                        }
+
+                        /*Añadimos los individuos elite*/
+                        for (Individuo individuo : elite) {
+                            poblacion.addIndividuo(individuo);
+                        }
+
+                        for (int i = 0; i < poblacion.getTamPoblacion(); i++) {
+                            if (!poblacion.getIndividuo(i).isCalculado()) {
+                                poblacion.getIndividuo(i).actualizarCoste();
+
+                                iteracion++; //Sumamos una iteracion por cada calculo del coste
+                            }
+                        }
+
+                        eliminarIndividuosSobrantes(poblacion);
+                        iteracion -= numElite;
+                    }
+
+                    break;
+            }
+
+        } catch (Exception e) {
+            System.err.println("AGGeneracional.Genetico.ejecutar(): " + e.getMessage());
         }
 
         /*Guardamos el individuo con mejor coste como el mejor individuo de toda la poblacion*/
@@ -166,11 +180,19 @@ public class Genetico {
         }
 
         mejorIndividuo = poblacion.getIndividuo(mejor);
+        Collections.sort(mejorIndividuo.getCromosoma());
 
-//        System.out.println("Tamaño poblacion: " + poblacion.getTamPoblacion() + "\n");
-//        for (int i = 0; i < poblacion.getTamPoblacion(); i++) {
-//            System.out.println("Coste: " + nuevaPoblacion.getIndividuo(i).getCoste() + "\nCromosoma: " + nuevaPoblacion.getIndividuo(i).getCromosoma().toString());
-//        }
+        String info = "[EJECUCION TERMINADA]\n"
+                + "Archivo: " + datos.getNombreFichero()
+                + "\nSemilla: " + semilla
+                + "\nOperadorCruce: " + operadorCruce
+                + "\nNumElite: " + numElite
+                + "\nMejor individuo: " + mejorIndividuo.getCromosoma().toString()
+                + "\nCoste: " + mejorIndividuo.getCoste()
+                + "\nTamañoSolucion: " + datos.getTamSolucion();
+
+        log.escribirFinal(info);
+        System.out.println(info);
     }
 
     //Funciones auxiliares
@@ -221,6 +243,9 @@ public class Genetico {
                 p2 = aux;
             }
 
+            log.escribir("CRUCE INICIADO\n" + "Cromosoma1: " + individuoA.getCromosoma().toString() + "\nCromosoma2: " + individuoB.getCromosoma().toString()
+                    + "\nPuntos: " + p1 + "|" + p2);
+
             for (int i = 0; i < p1; i++) {
                 r1.add(individuoB.getCromosoma().get(i));
                 r2.add(individuoA.getCromosoma().get(i));
@@ -234,10 +259,14 @@ public class Genetico {
                 r2.add(individuoA.getCromosoma().get(i));
             }
 
-            individuoA.setCromosoma(r1);
-            individuoB.setCromosoma(r2);
-            nuevaPoblacion.addIndividuo(new Individuo(semilla, datos));
-            nuevaPoblacion.addIndividuo(new Individuo(semilla, datos));
+            Individuo individuoAux1 = new Individuo(semilla, datos);
+            individuoAux1.setCromosoma(r1);
+            Individuo individuoAux2 = new Individuo(semilla, datos);
+            individuoAux2.setCromosoma(r2);
+            nuevaPoblacion.addIndividuo(individuoAux1);
+            nuevaPoblacion.addIndividuo(individuoAux2);
+
+            log.escribirNoInfo("CRUCE TERMINADO\n" + "Cromosoma1: " + individuoAux1.getCromosoma().toString() + "\nCromosoma2: " + individuoAux2.getCromosoma().toString());
         } catch (Exception e) {
             System.err.println("AGGeneracional.Genetico.cruce2P(): " + e.toString());
         }
@@ -247,10 +276,14 @@ public class Genetico {
      * @brief funcion que cruza dos cromosomas usando MPX
      * @param a primer cromosoma a cruzar
      * @param b segundo cromosoma a cruzar
-     * @param por probabilidad de que se realize el cruce
+     * @param prob probabilidad de que se realize el cruce
      */
-    private void cruceMPX(Vector<Integer> a, Vector<Integer> b, int por) {
-        //@TODO
+    private void cruceMPX(Vector<Integer> a, Vector<Integer> b, int prob) {
+        Vector<Integer> crom1 = obtenerHijoMPX(a, b, prob);
+        Vector<Integer> crom2 = obtenerHijoMPX(a, b, prob);
+
+        a = crom1;
+        b = crom2;
     }
 
     /**
@@ -259,7 +292,7 @@ public class Genetico {
      * @param p posicion del gen que se quiere mutar
      * @param n rango de valores de la mutacion
      */
-    private void Mutacion(Vector<Integer> v, int p, int n) {
+    private void mutacion(Vector<Integer> v, int p, int n) {
         int x = 0;
         do {
             x = aleatorio.nextInt(n);
@@ -293,7 +326,7 @@ public class Genetico {
             }
             int x = a.size() - r.size();
             for (int i = 0; i < x; i++) {
-                int ele = MasAporta(dist, a, n);
+                int ele = masAporta(dist, a, n);
                 a.add(a.get(ele));
             }
         } catch (Exception e) {
@@ -392,7 +425,7 @@ public class Genetico {
      * @param m tamaño de la solucion
      * @return posicion de mayor aporte
      */
-    private int MasAporta(double dist[][], Vector<Integer> vector, int m) {
+    private int masAporta(double dist[][], Vector<Integer> vector, int m) {
         double peso = 0.0;
         double mayor = 0.0;
         int posMayor = 0;
