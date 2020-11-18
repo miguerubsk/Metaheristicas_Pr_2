@@ -31,6 +31,14 @@ public class Genetico {
     private Individuo mejorIndividuo;
     private final GuardarLog log;
 
+    /**
+     * @brief Constructor
+     * @param datos archivo de datos
+     * @param config archivo de configuracion
+     * @param semilla semilla que se usara
+     * @param operadorCruce operador de cruce a usar
+     * @param numElite numero de elementos para la elite
+     */
     public Genetico(CargaDatos datos, Configurador config, Long semilla, String operadorCruce, Integer numElite) {
         this.poblacion = new Poblacion(semilla, datos, true, config);
         this.aleatorio = new Random(semilla);
@@ -123,7 +131,7 @@ public class Genetico {
                             }
                         }
 
-                        eliminarIndividuosSobrantes(poblacion);
+                        eliminarIndividuosSobrantes(poblacion); //Eliminamos los elementos que sobren de la solucion
 
                         log.escribir("NUMERO DE EVALUACIONES REALIZADAS: " + evaluaciones);
                         iteracion++;
@@ -136,13 +144,18 @@ public class Genetico {
                         log.escribir("NUMERO DE ITERACION: " + iteracion);
                         Vector<Individuo> elite = generarElite(); //Generamos la elite de la actual generacion 
 
+                        /*Realizamos el cruce y su reparacion para cada uno de los elementos de la seleccion.+
+                        Se realizará el cruce y reparacion con probabilidad 0.7.
+                        Si no se realiza cruce, el individuo es añadido sin realizar su cruce.*/
                         for (int i = 0; i < poblacion.getTamPoblacion(); i += 2) {
-                            cruceMPX(poblacion.getIndividuo(i).getCromosoma(), poblacion.getIndividuo(i + 1).getCromosoma(), (int) config.getProb_Cruce() * 100);
+                            cruceMPX(poblacion.getIndividuo(i).getCromosoma(), poblacion.getIndividuo(i + 1).getCromosoma(), (int) config.getProb_Cruce() * 100); //Realizamos el cruce
 
-                            repararMPX(poblacion.getIndividuo(i).getCromosoma(), datos.getMatriz(), datos.getTamSolucion());
-                            repararMPX(poblacion.getIndividuo(i + 1).getCromosoma(), datos.getMatriz(), datos.getTamSolucion());
+                            repararMPX(poblacion.getIndividuo(i).getCromosoma(), datos.getMatriz(), datos.getTamSolucion()); //Reparamos el primer elemento cruzado
+                            repararMPX(poblacion.getIndividuo(i + 1).getCromosoma(), datos.getMatriz(), datos.getTamSolucion()); //Reparamos el segundo elemento cruzado
                         }
 
+                        /*Realizamos la mutacion para cada elemento de los cromosomas de cada individuo.
+                        Esta mutacion tiene una probabilidad de 0.05.*/
                         for (int i = 0; i < poblacion.getTamPoblacion(); i++) {
                             for (int j = 0; j < poblacion.getIndividuo(i).getTamCromosoma(); j++) {
                                 if (aleatorio.nextDouble() < config.getProb_Mutacion()) {
@@ -157,6 +170,7 @@ public class Genetico {
                             poblacion.addIndividuo(individuo);
                         }
 
+                        /*Calculamos los costes de cada individuo si este no los tiene actualizados*/
                         for (int i = 0; i < poblacion.getTamPoblacion(); i++) {
                             if (!poblacion.getIndividuo(i).isCalculado()) {
                                 poblacion.getIndividuo(i).actualizarCoste();
@@ -165,7 +179,7 @@ public class Genetico {
                             }
                         }
 
-                        eliminarIndividuosSobrantes(poblacion);
+                        eliminarIndividuosSobrantes(poblacion); //Eliminamos los elementos que sobren de la solucion
 
                         log.escribir("NUMERO DE EVALUACIONES REALIZADAS: " + evaluaciones);
                         iteracion++;
@@ -246,7 +260,7 @@ public class Genetico {
      */
     private void cruce2P(Individuo individuoA, Individuo individuoB) {
         try {
-            Vector<Integer> r1 = new Vector<>(), r2 = new Vector<>();
+            Vector<Integer> nuevo1 = new Vector<>(), nuevo2 = new Vector<>();
             int tam = individuoA.getTamCromosoma();
             int p1, p2, aux;
             p1 = aleatorio.nextInt(tam);
@@ -265,22 +279,24 @@ public class Genetico {
                     + "\nPuntos: " + p1 + "|" + p2);
 
             for (int i = 0; i < p1; i++) {
-                r1.add(individuoB.getCromosoma().get(i));
-                r2.add(individuoA.getCromosoma().get(i));
+                nuevo1.add(individuoB.getCromosoma().get(i));
+                nuevo2.add(individuoA.getCromosoma().get(i));
             }
             for (int i = p1; i < p2; i++) {
-                r1.add(individuoA.getCromosoma().get(i));
-                r2.add(individuoB.getCromosoma().get(i));
+                nuevo1.add(individuoA.getCromosoma().get(i));
+                nuevo2.add(individuoB.getCromosoma().get(i));
             }
             for (int i = p2; i < individuoA.getTamCromosoma(); i++) {
-                r1.add(individuoB.getCromosoma().get(i));
-                r2.add(individuoA.getCromosoma().get(i));
+                nuevo1.add(individuoB.getCromosoma().get(i));
+                nuevo2.add(individuoA.getCromosoma().get(i));
             }
 
             Individuo individuoAux1 = new Individuo(semilla, datos);
-            individuoAux1.setCromosoma(r1);
+            individuoAux1.setCromosoma(nuevo1);
+            
             Individuo individuoAux2 = new Individuo(semilla, datos);
-            individuoAux2.setCromosoma(r2);
+            individuoAux2.setCromosoma(nuevo2);
+            
             nuevaPoblacion.addIndividuo(individuoAux1);
             nuevaPoblacion.addIndividuo(individuoAux2);
 
@@ -292,121 +308,127 @@ public class Genetico {
 
     /**
      * @brief funcion que cruza dos cromosomas usando MPX
-     * @param a primer cromosoma a cruzar
-     * @param b segundo cromosoma a cruzar
+     * @param individuoA primer cromosoma a cruzar
+     * @param individuoB segundo cromosoma a cruzar
      * @param prob probabilidad de que se realize el cruce
      */
-    private void cruceMPX(Vector<Integer> a, Vector<Integer> b, int prob) {
+    private void cruceMPX(Vector<Integer> individuoA, Vector<Integer> individuoB, int prob) {
 
-        log.escribir("CRUCE INICIADO\n" + "Cromosoma padre 1: " + a.toString() + "\nCromosoma padre 2: " + b.toString());
+        log.escribir("CRUCE INICIADO\n" + "Cromosoma padre 1: " + individuoA.toString() + "\nCromosoma padre 2: " + individuoB.toString());
 
-        Vector<Integer> crom1 = obtenerHijoMPX(a, b, prob);
-        Vector<Integer> crom2 = obtenerHijoMPX(a, b, prob);
+        Vector<Integer> crom1 = obtenerHijoMPX(individuoA, individuoB, prob);
+        Vector<Integer> crom2 = obtenerHijoMPX(individuoA, individuoB, prob);
 
         log.escribirNoInfo("CRUCE TERMINADO"
                 + "\nHIJO 1: " + crom1.toString()
                 + "\nHIJO 2: " + crom2.toString());
 
-        a = crom1;
-        b = crom2;
+        individuoA = crom1;
+        individuoB = crom2;
     }
 
     /**
      * @brief Funcion que muta un gen de un cromosoma
-     * @param v Cromosoma que se quiere mutar
-     * @param p posicion del gen que se quiere mutar
+     * @param crom Cromosoma que se quiere mutar
+     * @param pos posicion del gen que se quiere mutar
      * @param n rango de valores de la mutacion
      */
-    private void mutacion(Vector<Integer> v, int p, int n) {
-        log.escribir("MUTACION INICIADA" + "\nPosicion a mutar: " + p + " Valor antes de mutacion: " + v.get(p));
+    private void mutacion(Vector<Integer> crom, int pos, int n) {
+        log.escribir("MUTACION INICIADA" + "\nPosicion a mutar: " + pos + " Valor antes de mutacion: " + crom.get(pos));
 
         int x = 0;
         do {
             x = aleatorio.nextInt(n);
-        } while (v.contains(x));
+        } while (crom.contains(x));
 
-        intercambia(p, x, v);
+        intercambia(pos, x, crom);
 
-        log.escribirNoInfo("MUTACION TERMINADA" + "\nPosicion mutada: " + p + " Valor tras la mutacion: " + v.get(p));
+        log.escribirNoInfo("MUTACION TERMINADA" + "\nPosicion mutada: " + pos + " Valor tras la mutacion: " + crom.get(pos));
     }
 
     /**
-     * @brief Funcion que repara una solucion no factible
-     * @param a Solucion a reparar
+     * @brief Funcion que repara una solucion no factible de 2P
+     * @param crom Solucion a reparar
      * @param dist matriz de distancias
-     * @param n tamaño solucion
      */
-    private void reparar2Puntos(Vector<Integer> a, double dist[][]) {
-        log.escribir("REPARACION INICIADA\n" + "Cromosoma a reparar: " + a.toString());
+    private void reparar2Puntos(Vector<Integer> crom, double dist[][]) {
+        log.escribir("REPARACION INICIADA\n" + "Cromosoma a reparar: " + crom.toString());
         try {
             Vector<Integer> r = new Vector<Integer>();
 
-            for (int i = 0; i < a.size(); i++) {
-                boolean enc = false;
+            for (int i = 0; i < crom.size(); i++) {
+                boolean anadido = false;
                 for (int j = 0; j < r.size(); j++) {
-                    if (a.get(i) == r.get(j)) {
-                        enc = true;
+                    if (crom.get(i) == r.get(j)) {
+                        anadido = true;
                         break;
                     }
 
                 }
-                if (!enc) {
-                    r.add(a.get(i));
+                if (!anadido) {
+                    r.add(crom.get(i));
                 }
             }
+            
+            crom = r;
             int x = datos.getTamSolucion() - r.size();
             for (int i = 0; i < x; i++) {
-                int ele = masAporta(dist, a, datos.getTamSolucion());
-                a.add(a.get(ele));
+                int ele = masAporta(dist, crom, datos.getTamSolucion());
+                crom.add(crom.get(ele));
             }
         } catch (Exception e) {
             System.err.println("AGGeneracional.Genetico.reparar2Puntos(): " + e.toString());
         }
 
-        log.escribirNoInfo("REPARACION TERMINADA\n" + "Cromosoma reparado: " + a.toString());
+        log.escribirNoInfo("REPARACION TERMINADA\n" + "Cromosoma reparado: " + crom.toString());
     }
 
-    //@TODO
-    private void repararMPX(Vector<Integer> a, double dist[][], int m) {
-        log.escribir("REPARACION INICIADA\n" + "Cromosoma a reparar: " + a.toString());
+    /**
+     * @brief Funcion que repara una solucion no factible de MPX
+     * @param crom solucion a reparar
+     * @param dist matriz de distancias
+     * @param m tamaño de la solucion
+     */
+    private void repararMPX(Vector<Integer> crom, double dist[][], int m) {
+        log.escribir("REPARACION INICIADA\n" + "Cromosoma a reparar: " + crom.toString());
 
-        int dif = a.size() - m;
+        int dif = crom.size() - m;
         for (int i = 0; i < dif; i++) {
-            int p = menorAporte(a.size(), dist, a);
-            a.remove(p);
+            int p = menorAporte(crom.size(), dist, crom);
+            crom.remove(p);
         }
 
         Vector<Integer> r = new Vector<Integer>();
 
-        for (int i = 0; i < a.size(); i++) {
+        for (int i = 0; i < crom.size(); i++) {
             boolean enc = false;
             for (int j = 0; j < r.size(); j++) {
-                if (a.get(i) == r.get(j)) {
+                if (crom.get(i) == r.get(j)) {
                     enc = true;
                     break;
                 }
 
             }
             if (!enc) {
-                r.add(a.get(i));
+                r.add(crom.get(i));
             }
         }
 
-        a = r;
+        crom = r;
 
-        log.escribirNoInfo("REPARACION TERMINADA\n" + "Cromosoma reparado: " + a.toString());
+        log.escribirNoInfo("REPARACION TERMINADA\n" + "Cromosoma reparado: " + crom.toString());
     }
 
     /**
      * @brief función que devuelve un hijo al cruzar dos cromosomas usando MPX
-     * @param a primer cromosoma a cruzar
-     * @param b segundo cromosoma a cruzar
+     * @param padreA primer cromosoma a cruzar
+     * @param padreB segundo cromosoma a cruzar
      * @param prob probabilidad de que se realize el cruce
      * @return un cromosoma resultado de cruzar dos cromosomas
      */
-    private Vector<Integer> obtenerHijoMPX(Vector<Integer> a, Vector<Integer> b, int prob) {
+    private Vector<Integer> obtenerHijoMPX(Vector<Integer> padreA, Vector<Integer> padreB, int prob) {
         int p;
-        Vector<Integer> aa = a, bb = b, r = new Vector<>();
+        Vector<Integer> aa = padreA, bb = padreB, r = new Vector<>();
         int tam = aa.size();
         int elegibles = tam * prob / 100;
         int tamaP = tam;
@@ -420,7 +442,7 @@ public class Genetico {
 
         for (int i = 0; i < tam; i++) {
             if (!r.contains(bb.get(i))) {
-                r.add(b.get(i));
+                r.add(padreB.get(i));
             }
         }
 
@@ -493,6 +515,10 @@ public class Genetico {
         solucion.setElementAt(j, i);
     }
 
+    /**
+     * @brief Genera la elite de la poblacion actual con numElite
+     * @return vector de individuos elite
+     */
     private Vector<Individuo> generarElite() {
         Integer generados = 0;
         Vector<Individuo> elite = new Vector<>();
@@ -528,14 +554,26 @@ public class Genetico {
         return elite;
     }
 
+    /**
+     * @brief Obtiene el mejor individuo
+     * @return mejor individuo de la poblacion
+     */
     public Individuo getMejorIndividuo() {
         return mejorIndividuo;
     }
 
+    /**
+     * @brief Devuelve el tamaño de la poblacion actual
+     * @return tamaño de la poblacion actual
+     */
     public int getTamPoblacion() {
         return poblacion.getTamPoblacion();
     }
 
+     /**
+     * @brief Elimina los individuos que menor coste tienen y que sobran en la solucion
+     * @param poblacion una poblacion
+     */
     private void eliminarIndividuosSobrantes(Poblacion poblacion) {
         log.escribir("ELIMINAR ELEMENTOS SOBRANTES DE LA POBLACION");
 
