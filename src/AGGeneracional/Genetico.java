@@ -68,10 +68,11 @@ public class Genetico {
     public void ejecutar() throws Exception {
         int evaluaciones = 0;
         int iteracion = 0;
+        long start = 0, stop = 0;
         try {
+            start = System.currentTimeMillis();
             switch (operadorCruce) {
                 case "2P":
-
                     int contador;
                     /*Ejecutamos el algoritmo hasta que se complete el numero de iteraciones*/
                     while (evaluaciones < config.getEvaluaciones()) {
@@ -135,7 +136,6 @@ public class Genetico {
                         log.escribir("NUMERO DE EVALUACIONES REALIZADAS: " + evaluaciones);
                         iteracion++;
                     }
-
                     break;
 
                 case "MPX":
@@ -183,10 +183,10 @@ public class Genetico {
                         log.escribir("NUMERO DE EVALUACIONES REALIZADAS: " + evaluaciones);
                         iteracion++;
                     }
-
                     break;
             }
-
+            stop = System.currentTimeMillis();
+            
         } catch (Exception e) {
             System.err.println("AGGeneracional.Genetico.ejecutar(): " + e.getMessage());
         }
@@ -213,7 +213,8 @@ public class Genetico {
                 + "\nNumElite: " + numElite
                 + "\nMejor individuo: " + mejorIndividuo.getCromosoma().toString()
                 + "\nCoste: " + mejorIndividuo.getCoste()
-                + "\nTamañoSolucion: " + datos.getTamSolucion();
+                + "\nTamañoSolucion: " + datos.getTamSolucion()
+                + "\nTiempo: " + (stop-start) + " ms";
 
         log.escribirFinal(info);
         System.out.println(info);
