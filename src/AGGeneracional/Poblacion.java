@@ -6,7 +6,6 @@
 package AGGeneracional;
 
 import java.util.Vector;
-import java.util.concurrent.*;
 import tools.CargaDatos;
 import tools.Configurador;
 import tools.Random;
