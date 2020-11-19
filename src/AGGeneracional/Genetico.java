@@ -5,7 +5,6 @@
  */
 package AGGeneracional;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Random;
 import java.util.Vector;
@@ -293,10 +292,10 @@ public class Genetico {
 
             Individuo individuoAux1 = new Individuo(semilla, datos);
             individuoAux1.setCromosoma(nuevo1);
-            
+
             Individuo individuoAux2 = new Individuo(semilla, datos);
             individuoAux2.setCromosoma(nuevo2);
-            
+
             nuevaPoblacion.addIndividuo(individuoAux1);
             nuevaPoblacion.addIndividuo(individuoAux2);
 
@@ -357,24 +356,17 @@ public class Genetico {
             Vector<Integer> r = new Vector<Integer>();
 
             for (int i = 0; i < crom.size(); i++) {
-                boolean anadido = false;
-                for (int j = 0; j < r.size(); j++) {
-                    if (crom.get(i) == r.get(j)) {
-                        anadido = true;
-                        break;
-                    }
-
-                }
-                if (!anadido) {
+                if (!r.contains(crom.get(i))) {
                     r.add(crom.get(i));
                 }
             }
-            
-            crom = r;
+//            Collections.sort(r);
+            crom.clear();
+            crom.addAll(r);
             int x = datos.getTamSolucion() - r.size();
             for (int i = 0; i < x; i++) {
-                int ele = masAporta(dist, crom, datos.getTamSolucion());
-                crom.add(crom.get(ele));
+                int ele = masAporta(dist, crom);
+                crom.add(ele);
             }
         } catch (Exception e) {
             System.err.println("AGGeneracional.Genetico.reparar2Puntos(): " + e.toString());
@@ -484,22 +476,22 @@ public class Genetico {
      * @param m tamaño de la solucion
      * @return posicion de mayor aporte
      */
-    private int masAporta(double dist[][], Vector<Integer> vector, int m) {
+    private int masAporta(double dist[][], Vector<Integer> vector) {
         double peso = 0.0;
         double mayor = 0.0;
         int posMayor = 0;
-        for (int i = 0; i < m; i++) {
-            for (int j = 0; j < m; j++) {
-                if (vector.get(i) != vector.get(j)) {
-                    peso += dist[vector.get(i)][vector.get(j)];
+        for (int i = 0; i < datos.getTamMatriz(); i++) {
+            if (!vector.contains(i)) {
+                for (int j = 0; j < vector.size(); j++) {
+                    peso += dist[i][vector.get(j)];
                 }
-            }
 
-            if (peso < mayor) {
-                mayor = peso;
-                posMayor = i;
+                if (peso > mayor) {
+                    mayor = peso;
+                    posMayor = i;
+                }
+                peso = 0.0;
             }
-            peso = 0.0;
         }
 
         return posMayor;
@@ -570,8 +562,9 @@ public class Genetico {
         return poblacion.getTamPoblacion();
     }
 
-     /**
-     * @brief Elimina los individuos que menor coste tienen y que sobran en la solucion
+    /**
+     * @brief Elimina los individuos que menor coste tienen y que sobran en la
+     * solucion
      * @param poblacion una poblacion
      */
     private void eliminarIndividuosSobrantes(Poblacion poblacion) {
