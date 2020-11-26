@@ -45,7 +45,7 @@ public class Individuo {
         for(int i = 0; i < datos.getTamMatriz(); i++){
             marcados.add(Boolean.FALSE);
         }
-        for(int i = 0; i < tamCromosoma; i++){
+        for(int i = 0; i < cromosoma.size(); i++){
             marcados.setElementAt(true, this.cromosoma.get(i));
         }
         this.calculado = false;
