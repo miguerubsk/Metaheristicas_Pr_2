@@ -61,7 +61,7 @@ public class Individuo {
     }
 
     public int getTamCromosoma() {
-        return tamCromosoma;
+        return this.cromosoma.size();
     }
 
     public double getCoste() {
