@@ -6,4 +6,3 @@ Prob_Cruce=0.7
 Prob_Mutacion=0.05
 Elite=2 3
 Cruce=MPX 2P
-Debug=
