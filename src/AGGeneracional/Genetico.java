@@ -91,7 +91,7 @@ public class Genetico {
                         for (int i = 0; i < seleccion.size(); i += 2) {
                             if (aleatorio.nextDouble() < config.getProb_Cruce()) {
                                 cruce2P(seleccion.get(i), seleccion.get(i + 1));
-
+                                
                                 reparar2Puntos(nuevaPoblacion.getIndividuo(contador), datos.getMatriz());
                                 reparar2Puntos(nuevaPoblacion.getIndividuo(contador + 1), datos.getMatriz());
                                 contador += 2;
