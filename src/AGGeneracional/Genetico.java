@@ -69,14 +69,15 @@ public class Genetico {
         int evaluaciones = 0;
         int iteracion = 0;
         long start = 0, stop = 0;
-        try {
-            start = System.currentTimeMillis();
+        start = System.currentTimeMillis();
+        try {            
             switch (operadorCruce) {
                 case "2P":
                     int contador;
                     /*Ejecutamos el algoritmo hasta que se complete el numero de iteraciones*/
                     while (evaluaciones < config.getEvaluaciones()) {
                         log.escribir("NUMERO DE ITERACION: " + iteracion);
+//                        System.out.println("NUMERO DE ITERACION: " + iteracion + " Fichero: " + datos.getNombreFichero() + " Semilla: " + semilla + " Cruce: " + operadorCruce);
                         nuevaPoblacion = new Poblacion(semilla, datos, false, config); //Creamos una nueva poblacion para trabajar sobre ella
                         contador = 0;
 
@@ -90,9 +91,7 @@ public class Genetico {
                         for (int i = 0; i < seleccion.size(); i += 2) {
                             if (aleatorio.nextDouble() < config.getProb_Cruce()) {
                                 cruce2P(seleccion.get(i), seleccion.get(i + 1));
-                                if(nuevaPoblacion.getIndividuo(contador).getCromosoma().size() != 50 || nuevaPoblacion.getIndividuo(contador + 1).getCromosoma().size() != 50){
-                                    System.out.println("AGGeneracional.Genetico.ejecutar()");
-                                }
+
                                 reparar2Puntos(nuevaPoblacion.getIndividuo(contador), datos.getMatriz());
                                 reparar2Puntos(nuevaPoblacion.getIndividuo(contador + 1), datos.getMatriz());
                                 contador += 2;
@@ -144,6 +143,8 @@ public class Genetico {
                 case "MPX":
                     while (evaluaciones < config.getEvaluaciones()) {
                         log.escribir("NUMERO DE ITERACION: " + iteracion);
+//                        System.out.println("NUMERO DE ITERACION: " + iteracion + " Fichero: " + datos.getNombreFichero() + " Semilla: " + semilla + " Cruce: " + operadorCruce);
+
                         Vector<Individuo> elite = generarElite(); //Generamos la elite de la actual generacion 
 
                         /*Realizamos el cruce y su reparacion para cada uno de los elementos de la seleccion.+
@@ -188,11 +189,13 @@ public class Genetico {
                     }
                     break;
             }
-            stop = System.currentTimeMillis();
             
+
         } catch (Exception e) {
             System.err.println("AGGeneracional.Genetico.ejecutar(): " + e.getMessage());
         }
+        
+        stop = System.currentTimeMillis();
 
         /*Guardamos el individuo con mejor coste como el mejor individuo de toda la poblacion*/
         double mayor = 0;
@@ -217,7 +220,7 @@ public class Genetico {
                 + "\nMejor individuo: " + mejorIndividuo.getCromosoma().toString()
                 + "\nCoste: " + mejorIndividuo.getCoste()
                 + "\nTamañoSolucion: " + datos.getTamSolucion()
-                + "\nTiempo: " + (stop-start) + " ms";
+                + "\nTiempo: " + (stop - start) + " ms";
 
         log.escribirFinal(info);
         System.out.println(info);
@@ -342,7 +345,7 @@ public class Genetico {
         int x = 0;
         do {
             x = aleatorio.nextInt(n);
-        } while (crom.contains(x));
+        } while (crom.getCromosoma().contains(x));
 
         crom.intercambia(pos, x);
 
@@ -409,7 +412,8 @@ public class Genetico {
             }
         }
 
-        crom = r;
+        crom.removeAllElements();
+        crom.addAll(r);
 
         log.escribirNoInfo("REPARACION TERMINADA\n" + "Cromosoma reparado: " + crom.toString());
     }
@@ -500,8 +504,6 @@ public class Genetico {
         return posMayor;
     }
 
-    
-
     /**
      * @brief Genera la elite de la poblacion actual con numElite
      * @return vector de individuos elite
@@ -521,8 +523,14 @@ public class Genetico {
                     mejor = i;
                 }
             }
+            
+            if(mejor==null){
+                System.out.println("AGGeneracional.Genetico.generarElite()");
+            }
 
-            elite.add(poblacion.getIndividuo(mejor));
+            Individuo individuo = new Individuo(semilla, datos);
+            individuo.setCromosoma(poblacion.getIndividuo(mejor).getCromosoma());
+            elite.add(individuo);
             poblacion.getIndividuo(mejor).setElite(true);
             posiciones.add(mejor);
             generados++;
