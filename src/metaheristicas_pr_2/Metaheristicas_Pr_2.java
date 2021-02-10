@@ -41,21 +41,10 @@ public class Metaheristicas_Pr_2 {
                     for (int l = 0; l < config.getSemillas().size(); l++) {
                         Genetico genetico = new Genetico(Datos.get(k), config, config.getSemillas().get(l), config.getTipoCruce().get(i), config.getElite().get(j));
                         try {
-                            //                        System.out.println("i: " + i + " j: " + j + " k: " + k);
                             genetico.ejecutar();
                         } catch (Exception ex) {
                             Logger.getLogger(Metaheristicas_Pr_2.class.getName()).log(Level.SEVERE, null, ex);
                         }
-                        System.out.println("EJECUCION TERMINADA"
-                                + "\nFichero: " + Datos.get(k).getNombreFichero()
-                                + "\nSemilla: " + config.getSemillas().get(l)
-                                + "\nTipo de cruce: " + config.getTipoCruce().get(i)
-                                + "\nNum de elite: " + config.getElite().get(j)
-                                + "\nMejor individuo: " + genetico.getMejorIndividuo().getCromosoma().toString()
-                                + "\nTamaño cromosoma: " + genetico.getMejorIndividuo().getCromosoma().size()
-                                + "\nCoste mejor individuo: " + genetico.getMejorIndividuo().getCoste()
-                                + "\nTamaño poblacion final: " + genetico.getTamPoblacion()
-                                + "\n---------------------------------------------");
                     }
                 }
             }

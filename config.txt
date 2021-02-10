@@ -5,4 +5,4 @@ Evaluaciones=50000
 Prob_Cruce=0.7
 Prob_Mutacion=0.05
 Elite=2 3
-Cruce=2P MPX
+Cruce=MPX 2P

@@ -17,6 +17,7 @@ import tools.Random;
 public class Individuo {
 
     private Vector<Integer> cromosoma;
+    private Vector<Boolean> marcados;
     private int tamCromosoma;
     private double coste;
     private Random aleatorio;
@@ -26,7 +27,11 @@ public class Individuo {
 
     public Individuo(long semilla, CargaDatos datos) {
         this.datos = datos;
+        marcados = new Vector<>();
         this.aleatorio = new Random(semilla);
+        for(int i = 0; i < datos.getTamMatriz(); i++){
+            marcados.add(Boolean.FALSE);
+        }
         this.tamCromosoma = this.datos.getTamSolucion();
         this.cromosoma = generarCromosomaAleatorio(this.datos.getTamMatriz());
         this.coste = coste(this.datos);
@@ -36,15 +41,27 @@ public class Individuo {
 
     public void setCromosoma(Vector<Integer> cromosoma) {
         this.cromosoma = cromosoma;
+        marcados.removeAllElements();
+        for(int i = 0; i < datos.getTamMatriz(); i++){
+            marcados.add(Boolean.FALSE);
+        }
+        for(int i = 0; i < cromosoma.size(); i++){
+            marcados.setElementAt(true, this.cromosoma.get(i));
+        }
         this.calculado = false;
     }
 
     public Vector<Integer> getCromosoma() {
         return cromosoma;
     }
+    
+    public void add(int ele){
+        this.cromosoma.add(ele);
+        this.marcados.setElementAt(true, ele);
+    }
 
     public int getTamCromosoma() {
-        return tamCromosoma;
+        return this.cromosoma.size();
     }
 
     public double getCoste() {
@@ -76,6 +93,7 @@ public class Individuo {
             Integer elemento = aleatorio.Randint(0, tamañoMatriz - 1);
             if (!crom.contains(elemento)) {
                 crom.add(elemento);
+                marcados.setElementAt(true, elemento);
                 generados++;
             }
         }
@@ -112,5 +130,20 @@ public class Individuo {
         this.calculado = calculado;
     }
     
+    public boolean contains(int elemento){
+        return marcados.get(elemento);
+    }
+    
+    /**
+     * @brief Operador de intercambio que cambia un elemento por otro en la
+     * solucion
+     * @param i indice del elemento que se quiere modificar
+     * @param j elemento que se quiere añadir en la posicion i
+     */
+    public void intercambia(int i, int j) {
+        this.cromosoma.setElementAt(j, i);
+        this.marcados.setElementAt(false, this.cromosoma.get(i));
+        this.marcados.setElementAt(true, j);
+    }
     
 }
